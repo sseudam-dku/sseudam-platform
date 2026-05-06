@@ -3,10 +3,10 @@ export default function Home() {
     <main className="min-h-dvh px-6 py-8 sm:px-10">
       <section className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-5xl flex-col justify-center gap-8">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#16745b]">
+          <p className="text-sm font-semibold tracking-[0.18em] text-[#16745b] uppercase">
             Sseudam
           </p>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight text-[#1d211c] sm:text-6xl">
+          <h1 className="mt-4 text-4xl leading-tight font-semibold text-[#1d211c] sm:text-6xl">
             Next.js PWA client for the Sseudam monorepo.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-[#697064] sm:text-lg">

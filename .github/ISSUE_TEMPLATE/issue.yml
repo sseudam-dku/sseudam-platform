@@ -58,6 +58,6 @@ body:
       label: "✅ Todo"
       description: "작업할 내용을 체크리스트로 작성해주세요."
       value: |
-        - [ ] 
+        - [ ]
     validations:
       required: true

@@ -1,24 +1,24 @@
-import type { Metadata, Viewport } from 'next';
-import './globals.css';
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: 'Sseudam',
-    template: '%s | Sseudam',
+    default: "Sseudam",
+    template: "%s | Sseudam",
   },
-  description: 'Sseudam web application',
-  applicationName: 'Sseudam',
-  manifest: '/manifest.webmanifest',
+  description: "Sseudam web application",
+  applicationName: "Sseudam",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: 'Sseudam',
-    statusBarStyle: 'default',
+    title: "Sseudam",
+    statusBarStyle: "default",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#16745b',
-  width: 'device-width',
+  themeColor: "#16745b",
+  width: "device-width",
   initialScale: 1,
 };
 
