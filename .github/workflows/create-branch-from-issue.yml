@@ -1,0 +1,102 @@
+name: Create branch from issue
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  create-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create branch
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const allowedScopes = new Set(['fe', 'be', 'infra', 'ai']);
+            const allowedTypes = new Set([
+              'feature',
+              'fix',
+              'hotfix',
+              'refactor',
+              'style',
+              'docs',
+              'test',
+              'chore',
+            ]);
+
+            function getField(label) {
+              const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const pattern = new RegExp(`###\\s+${escapedLabel}\\s+\\n+([\\s\\S]*?)(?=\\n###\\s+|$)`, 'm');
+              const match = issue.body?.match(pattern);
+              return match?.[1]?.trim();
+            }
+
+            const scope = getField('🧩 Scope');
+            const type = getField('📍 Type');
+            const shortDescription = getField('🌳 Short Description') || '';
+
+            if (
+              !allowedScopes.has(scope) ||
+              !allowedTypes.has(type) ||
+              !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(shortDescription)
+            ) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body: [
+                  '브랜치를 자동 생성하지 못했습니다.',
+                  '',
+                  '- `Scope`, `Type`, `Short Description` 값을 이슈 템플릿에 맞게 입력했는지 확인해주세요.',
+                  '- `Short Description`은 영어 소문자, 숫자, 하이픈만 사용할 수 있습니다.',
+                ].join('\n'),
+              });
+              core.setFailed('Invalid issue form values.');
+              return;
+            }
+
+            const branchName = `${scope}/${type}/${issue.number}-${shortDescription}`;
+            let branchCreated = false;
+
+            const { data: repository } = await github.rest.repos.get({
+              owner,
+              repo,
+            });
+            const baseBranch = repository.default_branch;
+
+            const { data: baseRef } = await github.rest.git.getRef({
+              owner,
+              repo,
+              ref: `heads/${baseBranch}`,
+            });
+
+            try {
+              await github.rest.git.createRef({
+                owner,
+                repo,
+                ref: `refs/heads/${branchName}`,
+                sha: baseRef.object.sha,
+              });
+              branchCreated = true;
+            } catch (error) {
+              if (error.status !== 422) {
+                throw error;
+              }
+            }
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issue.number,
+              body: branchCreated
+                ? `브랜치가 생성되었습니다: \`${branchName}\``
+                : `이미 존재하는 브랜치입니다: \`${branchName}\``,
+            });

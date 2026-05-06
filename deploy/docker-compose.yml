@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: sseudam-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sseudam
+      POSTGRES_USER: sseudam
+      POSTGRES_PASSWORD: sseudam
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sseudam -d sseudam"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:

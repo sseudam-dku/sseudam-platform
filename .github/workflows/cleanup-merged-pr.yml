@@ -1,0 +1,65 @@
+name: Cleanup merged PR
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Delete merged branch and close linked issues
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const pullRequest = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const headRef = pullRequest.head.ref;
+            const headRepo = pullRequest.head.repo?.full_name;
+            const baseRepo = pullRequest.base.repo.full_name;
+            const defaultBranch = pullRequest.base.repo.default_branch;
+
+            if (headRepo === baseRepo && headRef !== defaultBranch) {
+              try {
+                await github.rest.git.deleteRef({
+                  owner,
+                  repo,
+                  ref: `heads/${headRef}`,
+                });
+                core.info(`Deleted branch: ${headRef}`);
+              } catch (error) {
+                if (error.status === 422 || error.status === 404) {
+                  core.info(`Branch already deleted or cannot be deleted: ${headRef}`);
+                } else {
+                  throw error;
+                }
+              }
+            } else {
+              core.info('Skipped branch deletion for forked PR or default branch.');
+            }
+
+            const body = pullRequest.body || '';
+            const closingKeywordPattern = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)\b/gi;
+            const issueNumbers = new Set();
+            let match;
+
+            while ((match = closingKeywordPattern.exec(body)) !== null) {
+              issueNumbers.add(Number(match[1]));
+            }
+
+            for (const issue_number of issueNumbers) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number,
+                state: 'closed',
+              });
+              core.info(`Closed issue: #${issue_number}`);
+            }

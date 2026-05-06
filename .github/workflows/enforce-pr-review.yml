@@ -1,0 +1,65 @@
+name: Enforce PR review
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  require-approval:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Require at least one approval from another person
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const pullRequest = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pull_number = pullRequest.number;
+            const author = pullRequest.user.login;
+
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner,
+              repo,
+              pull_number,
+              per_page: 100,
+            });
+
+            const latestReviewsByUser = new Map();
+
+            for (const review of reviews) {
+              if (!review.user?.login || !review.submitted_at) {
+                continue;
+              }
+
+              const previous = latestReviewsByUser.get(review.user.login);
+              if (!previous || new Date(review.submitted_at) > new Date(previous.submitted_at)) {
+                latestReviewsByUser.set(review.user.login, review);
+              }
+            }
+
+            const latestReviews = [...latestReviewsByUser.values()];
+            const blockingReview = latestReviews.find((review) => review.state === 'CHANGES_REQUESTED');
+
+            if (blockingReview) {
+              core.setFailed(`Changes were requested by @${blockingReview.user.login}.`);
+              return;
+            }
+
+            const approvalCount = latestReviews.filter((review) => {
+              return review.state === 'APPROVED' && review.user.login !== author;
+            }).length;
+
+            if (approvalCount < 1) {
+              core.setFailed('At least one approval from someone other than the PR author is required.');
+              return;
+            }
+
+            core.info(`Approval requirement satisfied with ${approvalCount} approval(s).`);
