@@ -1,22 +1,35 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma.service";
+import { randomUUID } from "crypto";
+import { QueryResultRow } from "pg";
+import { DatabaseService } from "../database.service";
 import { CreateUserDto } from "./create-user.dto";
+
+export interface UserRow extends QueryResultRow {
+  id: string;
+  email: string;
+  name: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly database: DatabaseService) {}
 
-  findAll() {
-    return this.prisma.user.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+  async findAll() {
+    const { rows } = await this.database.query<UserRow>(
+      'SELECT id, email, name, "createdAt", "updatedAt" FROM "User" ORDER BY "createdAt" DESC',
+    );
+
+    return rows;
   }
 
-  create(createUserDto: CreateUserDto) {
-    return this.prisma.user.create({
-      data: createUserDto,
-    });
+  async create(createUserDto: CreateUserDto) {
+    const { rows } = await this.database.query<UserRow>(
+      'INSERT INTO "User" (id, email, name, "createdAt", "updatedAt") VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, email, name, "createdAt", "updatedAt"',
+      [randomUUID(), createUserDto.email, createUserDto.name ?? null],
+    );
+
+    return rows[0];
   }
 }

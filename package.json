@@ -16,10 +16,7 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "format": "prettier --write .",
-    "db:generate": "pnpm --filter @sseudam/server db:generate",
-    "db:migrate": "pnpm --filter @sseudam/server db:migrate",
-    "db:studio": "pnpm --filter @sseudam/server db:studio"
+    "format": "prettier --write ."
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,md,yml,yaml}": "prettier --write --ignore-unknown"

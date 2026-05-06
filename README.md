@@ -5,7 +5,7 @@ pnpm monorepo for the Sseudam web client and REST API server.
 ## Stack
 
 - `apps/web`: Next.js 16, React 19, TypeScript 6, React Compiler, Tailwind CSS v4, PWA
-- `apps/server`: NestJS 11 REST API, Prisma 7, PostgreSQL
+- `apps/server`: NestJS 11 REST API, PostgreSQL
 - `deploy`: local PostgreSQL Docker Compose
 - `.github`: CI workflow
 
@@ -15,7 +15,6 @@ pnpm monorepo for the Sseudam web client and REST API server.
 pnpm install
 cp apps/server/.env.example apps/server/.env
 docker compose -f deploy/docker-compose.yml up -d
-pnpm db:generate
 pnpm dev
 ```
 
@@ -30,6 +29,4 @@ pnpm typecheck
 pnpm lint
 pnpm build
 pnpm test
-pnpm db:migrate
-pnpm db:studio
 ```
