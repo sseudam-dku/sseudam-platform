@@ -2,10 +2,66 @@
 
 :root {
   color-scheme: light;
+
+  /* Legacy aliases (keep for body defaults) */
   --background: #f7f8f4;
   --foreground: #1d211c;
   --muted: #697064;
   --primary: #16745b;
+
+  /* Brand */
+  --color-primary: #16745b;
+  --color-primary-foreground: #ffffff;
+
+  /* Surfaces */
+  --color-background: #f7f8f4;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f0f2ec;
+
+  /* Text */
+  --color-foreground: #1d211c;
+  --color-muted: #697064;
+
+  /* Borders & states */
+  --color-border: #dfe5d7;
+  --color-destructive: #c0392b;
+  --color-destructive-foreground: #ffffff;
+  --color-ring: #16745b;
+
+  /* Chat */
+  --color-bubble-user: var(--color-primary);
+  --color-bubble-assistant: var(--color-surface);
+  --color-bubble-user-text: var(--color-primary-foreground);
+  --color-bubble-assistant-text: var(--color-foreground);
+
+  /* Social login brand colors */
+  --color-social-google: #ffffff;
+  --color-social-google-text: #1d211c;
+  --color-social-google-border: #dfe5d7;
+  --color-social-kakao: #fee500;
+  --color-social-kakao-text: #191919;
+  --color-social-apple: #000000;
+  --color-social-apple-text: #ffffff;
+  --color-social-naver: #03c75a;
+  --color-social-naver-text: #ffffff;
+}
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+  --color-destructive: var(--color-destructive);
+  --color-destructive-foreground: var(--color-destructive-foreground);
+  --color-ring: var(--color-ring);
+  --color-bubble-user: var(--color-bubble-user);
+  --color-bubble-assistant: var(--color-bubble-assistant);
+  --color-bubble-user-text: var(--color-bubble-user-text);
+  --color-bubble-assistant-text: var(--color-bubble-assistant-text);
 }
 
 * {
@@ -19,8 +75,8 @@ body {
 
 body {
   margin: 0;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family:
     Inter,
     ui-sans-serif,
