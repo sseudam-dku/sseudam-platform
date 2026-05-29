@@ -1,32 +1,7 @@
-import { type ComponentProps, type ReactNode } from "react";
+import { type ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
-
-const providers = {
-  google: {
-    label: "Google로 계속하기",
-    className:
-      "border border-[var(--color-social-google-border)] bg-[var(--color-social-google)] text-[var(--color-social-google-text)] hover:opacity-90",
-  },
-  kakao: {
-    label: "카카오로 계속하기",
-    className:
-      "bg-[var(--color-social-kakao)] text-[var(--color-social-kakao-text)] hover:opacity-90",
-  },
-  apple: {
-    label: "Apple로 계속하기",
-    className:
-      "bg-[var(--color-social-apple)] text-[var(--color-social-apple-text)] hover:opacity-90",
-  },
-  naver: {
-    label: "네이버로 계속하기",
-    className:
-      "bg-[var(--color-social-naver)] text-[var(--color-social-naver-text)] hover:opacity-90",
-  },
-} as const;
-
-export type SocialProvider = keyof typeof providers;
 
 function GoogleIcon() {
   return (
@@ -51,63 +26,21 @@ function GoogleIcon() {
   );
 }
 
-function KakaoIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M12 3C6.48 3 2 6.58 2 10.92c0 2.78 1.84 5.23 4.6 6.63l-.95 3.47 3.98-2.62c.44.04.89.06 1.37.06 5.52 0 10-3.58 10-7.92S17.52 3 12 3z"
-      />
-    </svg>
-  );
+export interface GoogleLoginButtonProps extends Omit<ComponentProps<typeof Button>, "variant"> {
+  children?: React.ReactNode;
 }
 
-function AppleIcon() {
+export function GoogleLoginButton({ className, children, ...props }: GoogleLoginButtonProps) {
   return (
-    <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
-      />
-    </svg>
-  );
-}
-
-function NaverIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z"
-      />
-    </svg>
-  );
-}
-
-const providerIcons: Record<SocialProvider, () => ReactNode> = {
-  google: GoogleIcon,
-  kakao: KakaoIcon,
-  apple: AppleIcon,
-  naver: NaverIcon,
-};
-
-export interface SocialLoginButtonProps extends Omit<ComponentProps<typeof Button>, "variant"> {
-  provider: SocialProvider;
-}
-
-export function SocialLoginButton({
-  provider,
-  className,
-  children,
-  ...props
-}: SocialLoginButtonProps) {
-  const config = providers[provider];
-  const Icon = providerIcons[provider];
-
-  return (
-    <Button variant="outline" className={cn("w-full", config.className, className)} {...props}>
-      <Icon />
-      {children ?? config.label}
+    <Button
+      variant="outline"
+      className={cn(
+        "border-social-google-border flex w-full items-center justify-center gap-2 bg-white text-black hover:bg-neutral-50 active:bg-neutral-50",
+        className,
+      )}
+      {...props}>
+      <GoogleIcon />
+      {children ?? "Google로 계속하기"}
     </Button>
   );
 }

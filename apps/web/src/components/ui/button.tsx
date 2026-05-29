@@ -5,31 +5,25 @@ import { type ButtonHTMLAttributes, forwardRef } from "react";
 
 import { cn } from "@/lib/cn";
 
-const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        primary: "bg-primary text-primary-foreground hover:opacity-90 active:opacity-80",
-        secondary: "bg-surface-muted text-foreground hover:bg-border/60 active:bg-border/80",
-        outline:
-          "border border-border bg-surface text-foreground hover:bg-surface-muted active:bg-border/40",
-        ghost: "text-foreground hover:bg-surface-muted active:bg-border/40",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:opacity-90 active:opacity-80",
-      },
-      size: {
-        sm: "h-9 min-h-9 px-3 text-sm",
-        md: "h-11 min-h-11 px-4 text-sm",
-        lg: "h-12 min-h-12 px-6 text-base",
-      },
+const buttonVariants = cva("inline-flex cursor-pointer items-center justify-center gap-2", {
+  variants: {
+    variant: {
+      default: "bg-green-500 text-black hover:bg-green-600 active:bg-green-600",
+      secondary: "bg-white text-black hover:bg-neutral-50 active:bg-neutral-50",
+      outline:
+        "border border-neutral-300 bg-white text-black hover:bg-neutral-50 active:bg-neutral-50",
     },
-    defaultVariants: {
-      variant: "primary",
-      size: "md",
+    size: {
+      sm: "h-10 rounded-8 px-3 body-3",
+      md: "h-12 rounded-12 px-4 body-3",
+      lg: "h-14 rounded-16 px-6 body-3",
     },
   },
-);
+  defaultVariants: {
+    variant: "default",
+    size: "md",
+  },
+});
 
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {

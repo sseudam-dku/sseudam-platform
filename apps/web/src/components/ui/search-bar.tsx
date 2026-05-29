@@ -3,34 +3,18 @@
 import { Search, X } from "lucide-react";
 import { type FormEvent, type InputHTMLAttributes, forwardRef } from "react";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 
 export interface SearchBarProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
-  "type" | "readOnly" | "onSubmit"
+  "readOnly" | "onSubmit"
 > {
   onClear?: () => void;
   onSearch?: (value: string) => void;
-  readOnly?: boolean;
-  onReadOnlyClick?: () => void;
 }
 
 export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
-  (
-    {
-      className,
-      value,
-      onChange,
-      onClear,
-      onSearch,
-      readOnly = false,
-      onReadOnlyClick,
-      placeholder = "검색",
-      ...props
-    },
-    ref,
-  ) => {
+  ({ className, value, onChange, onClear, onSearch, placeholder = "검색", ...props }, ref) => {
     const stringValue = typeof value === "string" ? value : "";
     const hasValue = stringValue.length > 0;
 
@@ -39,53 +23,32 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
       onSearch?.(stringValue);
     }
 
-    function handleClear() {
-      onClear?.();
-    }
-
-    if (readOnly) {
-      return (
-        <button
-          type="button"
-          onClick={onReadOnlyClick}
-          className={cn(
-            "border-border bg-surface text-muted flex h-11 w-full items-center gap-2 rounded-lg border px-3 text-left text-sm",
-            className,
-          )}>
-          <Search className="size-4 shrink-0" aria-hidden="true" />
-          <span>{placeholder}</span>
-        </button>
-      );
-    }
-
     return (
       <form
         onSubmit={handleSubmit}
         className={cn(
-          "border-border bg-surface flex h-11 items-center gap-2 rounded-lg border px-3",
+          "rounded-12 flex h-12 items-center gap-2 border border-neutral-300 bg-white px-4 focus-within:ring-1 focus-within:ring-green-500",
           className,
         )}
         role="search">
-        <Search className="text-muted size-4 shrink-0" aria-hidden="true" />
+        <Search className="size-4 shrink-0 text-green-500" aria-hidden="true" />
         <input
           ref={ref}
-          type="search"
+          type="text"
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="text-foreground placeholder:text-muted min-w-0 flex-1 bg-transparent text-sm outline-none"
+          className="body-2 min-w-0 flex-1 bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400"
           {...props}
         />
         {hasValue ? (
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="sm"
-            className="size-8 min-h-8 min-w-8 px-0"
-            onClick={handleClear}
-            aria-label="검색어 지우기">
+            onClick={onClear}
+            aria-label="삭제"
+            className="rounded-8 flex cursor-pointer items-center justify-center text-neutral-400 hover:text-neutral-500 active:text-neutral-500">
             <X className="size-4" />
-          </Button>
+          </button>
         ) : null}
       </form>
     );

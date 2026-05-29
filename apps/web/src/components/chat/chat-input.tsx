@@ -1,8 +1,8 @@
 "use client";
 
-import { SendHorizontal } from "lucide-react";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 
+import { IconArrowUp } from "@/components/icons/arrow-up";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 
@@ -54,7 +54,7 @@ export function ChatInput({
   return (
     <div
       className={cn(
-        "border-border bg-surface border-t px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]",
+        "border-t border-neutral-200 bg-neutral-50 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]",
         className,
       )}>
       <div className="flex items-end gap-2">
@@ -66,16 +66,16 @@ export function ChatInput({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="border-border bg-surface-muted text-foreground placeholder:text-muted focus-visible:ring-ring max-h-[120px] min-h-11 flex-1 resize-none rounded-xl border px-4 py-2.5 text-sm leading-6 outline-none focus-visible:ring-2 disabled:opacity-50"
+          className="rounded-12 body-2 max-h-[120px] min-h-12 flex-1 resize-none bg-neutral-100 px-4 py-3 text-neutral-900 outline-none placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50"
         />
         <Button
           type="button"
           size="md"
-          className="size-11 min-w-11 shrink-0 px-0"
+          className="size-12 min-w-12 shrink-0 rounded-full px-0"
           disabled={!canSend}
           onClick={handleSend}
           aria-label="메시지 보내기">
-          <SendHorizontal className="size-5" />
+          <IconArrowUp className="size-5" />
         </Button>
       </div>
     </div>

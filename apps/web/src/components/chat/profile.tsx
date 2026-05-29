@@ -7,20 +7,20 @@ const sizeStyles = {
   sm: {
     container: "gap-2",
     avatar: "size-8 text-xs",
-    name: "text-sm font-medium",
-    subtitle: "text-xs",
+    name: "body-5 text-neutral-900",
+    subtitle: "body-5 text-neutral-400",
   },
   md: {
     container: "gap-3",
     avatar: "size-10 text-sm",
-    name: "text-sm font-semibold",
-    subtitle: "text-xs",
+    name: "body-3 text-neutral-900",
+    subtitle: "body-5 text-neutral-400",
   },
   lg: {
     container: "gap-3",
     avatar: "size-12 text-base",
-    name: "text-base font-semibold",
-    subtitle: "text-sm",
+    name: "body-1 text-neutral-900",
+    subtitle: "body-4 text-neutral-400",
   },
 } as const;
 
@@ -54,7 +54,7 @@ export function Profile({
     <div className={cn("flex items-center", styles.container, className)}>
       <div
         className={cn(
-          "bg-surface-muted text-foreground relative flex shrink-0 items-center justify-center overflow-hidden rounded-full",
+          "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 text-neutral-900",
           styles.avatar,
         )}>
         {avatarUrl ? (
@@ -67,12 +67,12 @@ export function Profile({
         ) : getInitials(name) ? (
           <span className="font-medium">{getInitials(name)}</span>
         ) : (
-          <User className="text-muted size-4" aria-hidden="true" />
+          <User className="size-4 text-neutral-400" aria-hidden="true" />
         )}
       </div>
       <div className="min-w-0">
-        <p className={cn("text-foreground truncate", styles.name)}>{name}</p>
-        {subtitle ? <p className={cn("text-muted truncate", styles.subtitle)}>{subtitle}</p> : null}
+        <p className={cn("truncate", styles.name)}>{name}</p>
+        {subtitle ? <p className={cn("truncate", styles.subtitle)}>{subtitle}</p> : null}
       </div>
     </div>
   );

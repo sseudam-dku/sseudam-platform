@@ -1,13 +1,11 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
 import { type ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 
 export interface HeaderProps {
-  title: string;
+  title?: ReactNode;
   onBack?: () => void;
   left?: ReactNode;
   right?: ReactNode;
@@ -19,15 +17,24 @@ export function Header({ title, onBack, left, right, className }: HeaderProps) {
     left !== undefined ? (
       left
     ) : onBack ? (
-      <Button
+      <button
         type="button"
-        variant="ghost"
-        size="sm"
-        className="size-11 min-w-11 px-0"
         onClick={onBack}
-        aria-label="뒤로 가기">
-        <ChevronLeft className="size-5" />
-      </Button>
+        aria-label="뒤로 가기"
+        className="flex size-11 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
     ) : (
       <div className="size-11 shrink-0" aria-hidden="true" />
     );
@@ -35,14 +42,12 @@ export function Header({ title, onBack, left, right, className }: HeaderProps) {
   return (
     <header
       className={cn(
-        "border-border bg-surface/95 supports-[backdrop-filter]:bg-surface/80 sticky top-0 z-40 flex h-14 items-center gap-2 border-b px-2 backdrop-blur",
+        "sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-neutral-200 bg-neutral-50/95 px-1.5 backdrop-blur supports-backdrop-filter:bg-neutral-50/80",
         "pt-[env(safe-area-inset-top)]",
         className,
       )}>
       <div className="flex w-11 shrink-0 items-center justify-start">{leftContent}</div>
-      <h1 className="text-foreground min-w-0 flex-1 truncate text-center text-base font-semibold">
-        {title}
-      </h1>
+      <div className="head-5 min-w-0 flex-1 truncate text-center text-neutral-900">{title}</div>
       <div className="flex w-11 shrink-0 items-center justify-end">
         {right ?? <div className="size-11 shrink-0" aria-hidden="true" />}
       </div>

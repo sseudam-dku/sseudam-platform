@@ -30,23 +30,21 @@ export function BottomSheet({
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Trigger asChild>{trigger}</Drawer.Trigger>
       <Drawer.Portal>
-        <Drawer.Overlay className="bg-foreground/40 fixed inset-0 z-50" />
+        <Drawer.Overlay className="fixed inset-0 z-50 bg-neutral-900/40" />
         <Drawer.Content
           className={cn(
-            "border-border bg-surface fixed inset-x-0 bottom-0 z-50 mt-24 flex max-h-[85dvh] flex-col rounded-t-2xl border outline-none",
+            "rounded-t-20 fixed inset-x-0 bottom-0 z-50 mt-24 flex max-h-[85dvh] flex-col bg-neutral-50 outline-none",
             className,
           )}>
-          <div className="bg-border mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full" />
+          <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-neutral-300" />
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
             {(title || description) && (
               <div className="mb-4 space-y-1">
                 {title ? (
-                  <Drawer.Title className="text-foreground text-lg font-semibold">
-                    {title}
-                  </Drawer.Title>
+                  <Drawer.Title className="head-4 text-neutral-900">{title}</Drawer.Title>
                 ) : null}
                 {description ? (
-                  <Drawer.Description className="text-muted text-sm">
+                  <Drawer.Description className="body-4 text-neutral-400">
                     {description}
                   </Drawer.Description>
                 ) : null}
@@ -54,7 +52,7 @@ export function BottomSheet({
             )}
             <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
             {footer ? (
-              <div className="border-border mt-4 shrink-0 border-t pt-4">{footer}</div>
+              <div className="mt-4 shrink-0 border-t border-neutral-200 pt-4">{footer}</div>
             ) : null}
           </div>
         </Drawer.Content>
