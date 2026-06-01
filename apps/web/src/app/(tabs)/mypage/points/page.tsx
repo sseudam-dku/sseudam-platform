@@ -31,7 +31,7 @@ export default function PointsPage() {
   const router = useRouter();
 
   return (
-    <div className="flex-1 overflow-y-auto bg-neutral-100">
+    <div className="scrollbar-hide flex-1 overflow-y-auto bg-neutral-100">
       <div className="flex flex-col gap-3 p-4">
         <div className="flex items-center gap-1">
           <button

@@ -1,9 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ChatBubble, type ChatBubbleProps } from "@/components/chat/chat-bubble";
 import { ChatInput } from "@/components/chat/chat-input";
+import { ChatbotHeader } from "@/components/layout/chatbot-header";
+import { cn } from "@/lib/cn";
 
 const QUICK_ACTIONS = [
   { emoji: "🧴", label: "플라스틱 배출 방법 알려줘" },
@@ -24,7 +27,16 @@ const MOCK_REPLIES: Record<string, string> = {
 type Message = Omit<ChatBubbleProps, "className">;
 
 export function ChatbotTab() {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isExiting, setIsExiting] = useState(false);
+
+  function handleBack() {
+    if (isExiting) return;
+
+    setIsExiting(true);
+    window.setTimeout(() => router.push("/"), 300);
+  }
 
   function sendMessage(text: string) {
     const userMsg: Message = { role: "user", content: text, status: "sent" };
@@ -36,7 +48,13 @@ export function ChatbotTab() {
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div
+      className={cn(
+        "flex flex-1 flex-col overflow-hidden bg-white",
+        isExiting && "animate-slide-out-right",
+      )}>
+      <ChatbotHeader onBack={handleBack} />
+
       {isEmpty ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-8 bg-neutral-100 p-6">
           <div className="flex flex-col items-center gap-3 text-center">
@@ -67,7 +85,7 @@ export function ChatbotTab() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto bg-neutral-100">
+        <div className="scrollbar-hide flex-1 overflow-y-auto bg-neutral-100">
           <div className="flex flex-col gap-3 p-4">
             {messages.map((msg, i) => (
               <ChatBubble key={i} {...msg} />
@@ -76,7 +94,7 @@ export function ChatbotTab() {
         </div>
       )}
 
-      <ChatInput onSend={sendMessage} />
+      <ChatInput variant="chatbot" onSend={sendMessage} />
     </div>
   );
 }

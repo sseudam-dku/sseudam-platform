@@ -1,4 +1,4 @@
-export function IconHome({ className, filled }: { className?: string; filled?: boolean }) {
+export function IconRecord({ className, filled }: { className?: string; filled?: boolean }) {
   if (filled) {
     return (
       <svg
@@ -9,7 +9,7 @@ export function IconHome({ className, filled }: { className?: string; filled?: b
         fill="currentColor"
         className={className}>
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <path d="M12 3l9 8.5v9.5a1 1 0 0 1 -1 1h-5v-6a2 2 0 0 0 -2 -2h-2a2 2 0 0 0 -2 2v6h-5a1 1 0 0 1 -1 -1v-9.5l9 -8.5z" />
+        <path d="M14 2h-7a2 2 0 0 0 -2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-9l-5 -5z" />
       </svg>
     );
   }
@@ -27,9 +27,10 @@ export function IconHome({ className, filled }: { className?: string; filled?: b
       strokeLinejoin="round"
       className={className}>
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
-      <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-      <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+      <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+      <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+      <path d="M9 13h6" />
+      <path d="M9 17h4" />
     </svg>
   );
 }

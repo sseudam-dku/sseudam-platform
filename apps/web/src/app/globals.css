@@ -203,3 +203,26 @@ a {
   line-height: 140%;
   letter-spacing: -0.025em;
 }
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@utility animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-in both;
+}

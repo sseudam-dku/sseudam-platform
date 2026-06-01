@@ -90,7 +90,7 @@ export function CategoryTab() {
           <span className="head-5 text-neutral-900">{category.name}</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="scrollbar-hide flex-1 overflow-y-auto">
           <div className="flex flex-col gap-3 p-4">
             <div
               className={cn(
@@ -126,7 +126,7 @@ export function CategoryTab() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-neutral-100">
+    <div className="scrollbar-hide flex-1 overflow-y-auto bg-neutral-100">
       <div className="flex flex-col gap-4 p-4">
         <div className="rounded-16 bg-white p-4 shadow-sm">
           <p className="body-5 mb-3 font-semibold tracking-widest text-neutral-400 uppercase">

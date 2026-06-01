@@ -98,7 +98,7 @@ export function CameraTab() {
 
   if (state === "success") {
     return (
-      <div className="flex-1 overflow-y-auto bg-neutral-100">
+      <div className="scrollbar-hide flex-1 overflow-y-auto bg-neutral-100">
         <div className="flex flex-col gap-3 p-4">
           <div className="rounded-20 flex aspect-video w-full items-center justify-center bg-neutral-800">
             <IconCamera className="size-12 text-neutral-600" />

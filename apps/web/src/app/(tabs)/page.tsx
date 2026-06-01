@@ -17,7 +17,7 @@ const TIPS = [
 
 export default function HomePage() {
   return (
-    <div className="flex-1 overflow-y-auto bg-neutral-100">
+    <div className="scrollbar-hide flex-1 overflow-y-auto bg-neutral-100">
       <div className="flex flex-col gap-4 p-4">
         <div className="rounded-20 bg-green-500 p-5 text-white">
           <p className="body-5 font-semibold tracking-widest uppercase opacity-80">서울 마포구</p>

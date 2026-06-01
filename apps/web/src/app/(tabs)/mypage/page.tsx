@@ -164,7 +164,7 @@ export default function MyPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto bg-neutral-100">
+    <div className="scrollbar-hide flex flex-1 flex-col overflow-y-auto bg-neutral-100">
       <div className="flex flex-col items-center gap-2 bg-white px-4 pt-6 pb-4">
         <div className="relative flex w-full justify-center">
           <div className="flex size-20 items-center justify-center rounded-full bg-neutral-100">

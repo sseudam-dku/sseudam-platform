@@ -50,7 +50,7 @@ export function BottomSheet({
                 ) : null}
               </div>
             )}
-            <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+            <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto">{children}</div>
             {footer ? (
               <div className="mt-4 shrink-0 border-t border-neutral-200 pt-4">{footer}</div>
             ) : null}
