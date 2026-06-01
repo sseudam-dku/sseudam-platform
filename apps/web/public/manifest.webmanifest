@@ -1,17 +1,17 @@
 {
-  "name": "Sseudam",
-  "short_name": "Sseudam",
-  "description": "Sseudam web application",
+  "name": "쓰담",
+  "short_name": "쓰담",
+  "description": "우리 동네 맞춤 분리배출 가이드",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#1cb854",
+  "theme_color": "#22c55e",
   "icons": [
     {
-      "src": "/icons/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/logo-pwa.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

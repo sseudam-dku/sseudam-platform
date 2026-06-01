@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   description: "우리 동네 맞춤 분리배출 가이드",
   applicationName: "쓰담",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/logo.svg",
+    apple: "/logo-pwa.png",
+  },
   appleWebApp: {
     capable: true,
     title: "쓰담",

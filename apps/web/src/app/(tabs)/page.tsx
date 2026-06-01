@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { getTodayTip } from "@/lib/daily-tips";
+
 const CATEGORIES = [
   { id: "plastic", name: "플라스틱", emoji: "🧴", href: "/category" },
   { id: "paper", name: "종이·박스", emoji: "📦", href: "/category" },
@@ -9,13 +11,8 @@ const CATEGORIES = [
   { id: "styrofoam", name: "스티로폼", emoji: "📫", href: "/category" },
 ];
 
-const TIPS = [
-  "플라스틱은 뚜껑을 분리하고 압착해서 버려요.",
-  "종이컵은 물기를 제거한 뒤 종이류로 배출해요.",
-  "음식물 쓰레기는 물기를 최대한 제거해요.",
-];
-
 export default function HomePage() {
+  const tip = getTodayTip();
   return (
     <div className="scrollbar-hide flex-1 overflow-y-auto bg-neutral-100">
       <div className="flex flex-col gap-4 p-4">
@@ -26,16 +23,17 @@ export default function HomePage() {
         </div>
 
         <div className="rounded-16 bg-white p-4 shadow-sm">
-          <p className="body-5 mb-3 font-semibold tracking-widest text-neutral-400 uppercase">
+          <p className="body-5 mb-1 font-semibold tracking-widest text-neutral-400 uppercase">
             오늘의 분리배출 팁
           </p>
+          <p className="body-3 mb-3 font-semibold text-neutral-900">{tip.title}</p>
           <div className="flex flex-col gap-2">
-            {TIPS.map((tip, i) => (
+            {tip.steps.map((step, i) => (
               <div key={i} className="flex items-start gap-3">
                 <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-600">
                   {i + 1}
                 </span>
-                <p className="body-4 text-neutral-700">{tip}</p>
+                <p className="body-4 text-neutral-700">{step}</p>
               </div>
             ))}
           </div>
@@ -57,18 +55,6 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-
-        <Link
-          href="/camera"
-          className="rounded-16 flex items-center gap-4 bg-white p-4 shadow-sm hover:bg-neutral-50 active:bg-neutral-50">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-green-50 text-2xl">
-            📷
-          </div>
-          <div>
-            <p className="body-3 text-neutral-900">뭔지 모르겠어요</p>
-            <p className="body-4 text-neutral-500">카메라로 찍으면 쓰담이 알아서 분류해줘요</p>
-          </div>
-        </Link>
       </div>
     </div>
   );
