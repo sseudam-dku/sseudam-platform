@@ -3,7 +3,7 @@
 import Lottie from "lottie-react";
 import globeAnimation from "../../../public/lottie/Globe.json";
 
-export function CameraAnalyzer() {
+const CameraAnalyzer = () => {
   return (
     <div className="animate-page-enter flex flex-1 flex-col items-center justify-center bg-neutral-100 text-center">
       <Lottie animationData={globeAnimation} loop autoplay className="h-50 w-50" />
@@ -13,4 +13,6 @@ export function CameraAnalyzer() {
       </div>
     </div>
   );
-}
+};
+
+export default CameraAnalyzer;

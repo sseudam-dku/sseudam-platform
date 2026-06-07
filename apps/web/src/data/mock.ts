@@ -48,21 +48,21 @@ interface QuickAction {
   label: string;
 }
 
-export const STATS: Stat[] = [
+const STATS: Stat[] = [
   { label: "분리배출", value: "24회", color: "text-green-500" },
   { label: "획득 포인트", value: "250P", color: "text-amber-500" },
   { label: "이번 달", value: "8회", color: "text-blue-500" },
   { label: "연속 달성", value: "3일", color: "text-rose-500" },
 ];
 
-export const CATEGORIES: Category[] = [
+const CATEGORIES: Category[] = [
   { name: "플라스틱", percent: 45, color: "bg-orange-400" },
   { name: "종이·박스", percent: 30, color: "bg-blue-400" },
   { name: "캔·금속", percent: 15, color: "bg-yellow-400" },
   { name: "유리", percent: 10, color: "bg-teal-400" },
 ];
 
-export const BADGES: Badge[] = [
+const BADGES: Badge[] = [
   {
     id: "1",
     name: "연속 3일",
@@ -110,7 +110,7 @@ export const BADGES: Badge[] = [
   },
 ];
 
-export const ACTIVITY: Activity[] = [
+const ACTIVITY: Activity[] = [
   { date: "2024.05.28", category: "플라스틱 분리배출", points: 10 },
   { date: "2024.05.27", category: "종이·박스 분리배출", points: 10 },
   { date: "2024.05.26", category: "캔·금속 분리배출", points: 15 },
@@ -118,7 +118,7 @@ export const ACTIVITY: Activity[] = [
   { date: "2024.05.24", category: "플라스틱 분리배출", points: 10 },
 ];
 
-export const MOCK_RECORDS: MockRecord[] = [
+const MOCK_RECORDS: MockRecord[] = [
   {
     id: "1",
     date: "2026-06-07 14:30",
@@ -166,7 +166,7 @@ export const MOCK_RECORDS: MockRecord[] = [
   },
 ];
 
-export const HOME_CATEGORIES: HomeCategory[] = [
+const HOME_CATEGORIES: HomeCategory[] = [
   { id: "plastic", name: "플라스틱", emoji: "🧴", href: "/category" },
   { id: "paper", name: "종이·박스", emoji: "📦", href: "/category" },
   { id: "glass", name: "유리", emoji: "🍶", href: "/category" },
@@ -175,13 +175,13 @@ export const HOME_CATEGORIES: HomeCategory[] = [
   { id: "styrofoam", name: "스티로폼", emoji: "📫", href: "/category" },
 ];
 
-export const QUICK_ACTIONS: QuickAction[] = [
+const QUICK_ACTIONS: QuickAction[] = [
   { emoji: "🧴", label: "플라스틱 배출 방법 알려줘" },
   { emoji: "📍", label: "내 지역 규정 알려줘" },
   { emoji: "♻️", label: "재활용 마크 설명해줘" },
 ];
 
-export const MOCK_REPLIES: Record<string, string> = {
+const MOCK_REPLIES: Record<string, string> = {
   default: "죄송해요, 아직 개발 중인 기능이에요. 곧 더 많은 답변을 드릴 수 있을 거예요!",
   "플라스틱 배출 방법 알려줘":
     "플라스틱은 내용물을 비우고 압착한 후 플라스틱 수거함에 배출하세요. 뚜껑은 제거하고, 이물질이 많으면 일반쓰레기로 배출합니다.",
@@ -190,3 +190,16 @@ export const MOCK_REPLIES: Record<string, string> = {
   "재활용 마크 설명해줘":
     "재활용 마크는 재활용 가능 여부와 소재를 표시해요. 삼각형 안의 숫자로 플라스틱 종류를 구분할 수 있어요.",
 };
+
+const MOCK_DATA = {
+  STATS,
+  CATEGORIES,
+  BADGES,
+  ACTIVITY,
+  MOCK_RECORDS,
+  HOME_CATEGORIES,
+  QUICK_ACTIONS,
+  MOCK_REPLIES,
+};
+
+export default MOCK_DATA;

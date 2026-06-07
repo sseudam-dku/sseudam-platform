@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import iconPoint from "@/assets/icon-point.svg";
 import { Header } from "@/components/ui/header";
 import { cn } from "@/lib/cn";
-import { ACTIVITY } from "@/data/mock";
+import mockData from "@/data/mock";
 
 const Page = () => {
   const router = useRouter();
@@ -30,12 +30,12 @@ const Page = () => {
         <div className="flex flex-col gap-3">
           <h2 className="body-5 px-1 tracking-widest text-neutral-400 uppercase">상세 적립 내역</h2>
           <div className="rounded-20 overflow-hidden border border-neutral-100/50 bg-white shadow-sm">
-            {ACTIVITY.map((item, i) => (
+            {mockData.ACTIVITY.map((item, i) => (
               <div
-                key={i}
+                key={`${item.category}-${item.date}`}
                 className={cn(
                   "flex items-center justify-between px-5 py-4 transition-colors hover:bg-neutral-50",
-                  i < ACTIVITY.length - 1 && "border-b border-neutral-100",
+                  i < mockData.ACTIVITY.length - 1 && "border-b border-neutral-100",
                 )}>
                 <div className="flex items-center gap-3.5">
                   <Image src={iconPoint} alt="포인트" width={28} height={28} className="shrink-0" />

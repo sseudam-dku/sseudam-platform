@@ -8,11 +8,11 @@ import { useState } from "react";
 import iconPoint from "@/assets/icon-point.svg";
 import { GoogleLoginButton } from "@/components/ui/social-login-button";
 import { cn } from "@/lib/cn";
-import { BADGES } from "@/data/mock";
+import mockData from "@/data/mock";
 
 const Page = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const earnedBadgesCount = BADGES.filter(b => b.earned).length;
+  const earnedBadgesCount = mockData.BADGES.filter(b => b.earned).length;
 
   if (!isLoggedIn) {
     return (
@@ -75,14 +75,15 @@ const Page = () => {
 
           {/* 뱃지 미리보기 */}
           <div className="flex justify-center gap-3">
-            {BADGES.slice(0, 6).map(badge => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+            {mockData.BADGES.slice(0, 6).map(badge => (
+              <Image
                 key={badge.id}
                 src={badge.image}
                 alt={badge.name}
                 title={badge.name}
-                className={cn("size-11 object-contain", !badge.earned && "opacity-35 grayscale")}
+                width={44}
+                height={44}
+                className={cn("object-contain", !badge.earned && "opacity-35 grayscale")}
               />
             ))}
           </div>

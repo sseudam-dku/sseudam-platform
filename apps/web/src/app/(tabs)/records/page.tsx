@@ -1,4 +1,4 @@
-import { MOCK_RECORDS } from "@/data/mock";
+import mockData from "@/data/mock";
 
 const page = () => {
   return (
@@ -13,7 +13,7 @@ const page = () => {
         <div className="flex flex-col gap-3">
           <p className="body-5 px-1 tracking-widest text-neutral-400 uppercase">상세 기록 목록</p>
           <div className="flex flex-col gap-2">
-            {MOCK_RECORDS.map(rec => (
+            {mockData.MOCK_RECORDS.map(rec => (
               <div
                 key={rec.id}
                 className="rounded-16 flex items-center justify-between border border-neutral-100 bg-white p-4 shadow-sm">

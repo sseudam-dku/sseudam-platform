@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { HOME_CATEGORIES } from "@/data/mock";
+import mockData from "@/data/mock";
 import { getTodayTip } from "@/lib/daily-tips";
 
 const page = () => {
@@ -34,7 +34,7 @@ const page = () => {
         <div className="rounded-16 bg-white p-4 shadow-sm">
           <p className="body-5 mb-3 tracking-widest text-neutral-400 uppercase">카테고리</p>
           <div className="grid grid-cols-3 gap-3">
-            {HOME_CATEGORIES.map(cat => (
+            {mockData.HOME_CATEGORIES.map(cat => (
               <Link
                 key={cat.id}
                 href={cat.href}

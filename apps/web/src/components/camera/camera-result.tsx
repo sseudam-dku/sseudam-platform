@@ -1,24 +1,58 @@
 "use client";
 
+import Image from "next/image";
 import { Camera, MessageSquareText, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocationStore } from "@/lib/store/use-location-store";
+
+export interface TrashComponent {
+  name: string;
+  category: string;
+}
+
+export interface TrashAnalysisResult {
+  name: string;
+  category: string;
+  components: TrashComponent[];
+  steps: string[];
+}
 
 interface CameraResultProps {
   isSuccess: boolean;
   capturedImage: string | null;
   onReset: () => void;
   onNavigateChatbot: () => void;
+  analysisResult?: TrashAnalysisResult | null;
 }
+
+const DEFAULT_DISTRICT = "마포구";
+
+const DEFAULT_ANALYSIS_RESULT: TrashAnalysisResult = {
+  name: "알루미늄 컵",
+  category: "재활용 쓰레기: 캔류, 고철류",
+  components: [
+    { name: "컵 몸체", category: "캔류, 고철류" },
+    { name: "컵 몸체", category: "캔류, 고철류" },
+  ],
+  steps: [
+    "금속류끼리 모아서 배출하거나, 큰 고철은 대형폐기물로 신고해요.",
+    "금속류끼리 모아서 배출하거나, 큰 고철은 대형폐기물로 신고해요.",
+  ],
+};
 
 const CameraResult = ({
   isSuccess,
   capturedImage,
   onReset,
   onNavigateChatbot,
+  analysisResult,
 }: CameraResultProps) => {
   const { location } = useLocationStore();
-  const district = location.split(" ").pop() || "마포구";
+  const district = location?.trim()
+    ? location.trim().split(/\s+/).pop() || DEFAULT_DISTRICT
+    : DEFAULT_DISTRICT;
+
+  const result = analysisResult || DEFAULT_ANALYSIS_RESULT;
 
   if (isSuccess) {
     return (
@@ -27,8 +61,14 @@ const CameraResult = ({
           {/* 촬영한 사진 */}
           <div className="rounded-20 relative aspect-square w-full overflow-hidden border border-neutral-200 bg-neutral-800 shadow-md">
             {capturedImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={capturedImage} alt="촬영한 사진" className="h-full w-full object-cover" />
+              <Image
+                src={capturedImage}
+                alt="촬영한 사진"
+                fill
+                sizes="(max-width: 768px) 100vw, 500px"
+                className="object-cover"
+                unoptimized
+              />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
                 <Camera className="size-12 text-neutral-600" />
@@ -39,22 +79,22 @@ const CameraResult = ({
           {/* 쓰레기 이름 */}
           <div className="rounded-20 border border-neutral-100 bg-white p-5 shadow-sm">
             <p className="body-5 mb-1 text-green-600">촬영한 쓰레기</p>
-            <p className="head-3 text-neutral-900">알루미늄 컵</p>
-            <p className="body-4 mt-1.5 text-neutral-500">재활용 쓰레기: 캔류, 고철류</p>
+            <p className="head-3 text-neutral-900">{result.name}</p>
+            <p className="body-4 mt-1.5 text-neutral-500">{result.category}</p>
           </div>
 
           {/* 부품 내용 */}
           <div className="rounded-20 border border-neutral-100 bg-white p-5 shadow-sm">
             <p className="body-4 mb-3 text-neutral-900">부품 내용</p>
             <div className="flex flex-col gap-2">
-              <div className="rounded-12 flex items-center justify-between border border-neutral-100 bg-neutral-50 p-3.5">
-                <span className="body-3 text-neutral-800">컵 몸체</span>
-                <span className="body-4 text-neutral-500">캔류, 고철류</span>
-              </div>
-              <div className="rounded-12 flex items-center justify-between border border-neutral-100 bg-neutral-50 p-3.5">
-                <span className="body-3 text-neutral-800">컵 몸체</span>
-                <span className="body-4 text-neutral-500">캔류, 고철류</span>
-              </div>
+              {result.components.map((comp, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-12 flex items-center justify-between border border-neutral-100 bg-neutral-50 p-3.5">
+                  <span className="body-3 text-neutral-800">{comp.name}</span>
+                  <span className="body-4 text-neutral-500">{comp.category}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -62,27 +102,19 @@ const CameraResult = ({
           <div className="rounded-20 border border-neutral-100 bg-white p-5 shadow-sm">
             <p className="body-4 mb-3 text-neutral-900">분리 배출 가이드</p>
             <div className="rounded-16 flex flex-col gap-4 border border-neutral-100 bg-neutral-50 p-4">
-              <div className="flex flex-col gap-1.5">
-                <div>
-                  <span className="rounded-8 body-5 bg-neutral-500 px-2 py-0.5 tracking-wider text-white uppercase">
-                    step1
-                  </span>
+              {result.steps.map((step, idx) => (
+                <div key={idx} className="flex flex-col gap-4">
+                  {idx > 0 && <div className="h-px bg-neutral-200/60" />}
+                  <div className="flex flex-col gap-1.5">
+                    <div>
+                      <span className="rounded-8 body-5 bg-neutral-500 px-2 py-0.5 tracking-wider text-white uppercase">
+                        step{idx + 1}
+                      </span>
+                    </div>
+                    <p className="body-4 leading-relaxed text-neutral-700">{step}</p>
+                  </div>
                 </div>
-                <p className="body-4 leading-relaxed text-neutral-700">
-                  금속류끼리 모아서 배출하거나, 큰 고철은 대형폐기물로 신고해요.
-                </p>
-              </div>
-              <div className="h-px bg-neutral-200/60" />
-              <div className="flex flex-col gap-1.5">
-                <div>
-                  <span className="rounded-8 body-5 bg-neutral-500 px-2 py-0.5 tracking-wider text-white uppercase">
-                    step2
-                  </span>
-                </div>
-                <p className="body-4 leading-relaxed text-neutral-700">
-                  금속류끼리 모아서 배출하거나, 큰 고철은 대형폐기물로 신고해요.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
 

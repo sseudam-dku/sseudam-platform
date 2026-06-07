@@ -4,16 +4,58 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import CameraScanner from "../camera/camera-scanner";
-import { CameraAnalyzer } from "../camera/camera-analyzer";
-import CameraResult from "../camera/camera-result";
+import CameraAnalyzer from "../camera/camera-analyzer";
+import CameraResult, { type TrashAnalysisResult } from "../camera/camera-result";
 
 type CameraState = "idle" | "analyzing" | "success" | "failure";
+
+const MOCK_ANALYSIS_RESULTS: TrashAnalysisResult[] = [
+  {
+    name: "알루미늄 컵",
+    category: "재활용 쓰레기: 캔류, 고철류",
+    components: [
+      { name: "컵 몸체", category: "캔류, 고철류" },
+      { name: "플라스틱 빨대", category: "플라스틱" },
+    ],
+    steps: [
+      "금속류(캔류)로 배출하세요. 이물질은 깨끗이 비워야 합니다.",
+      "플라스틱 빨대는 분리하여 플라스틱 수거함에 배출하세요.",
+    ],
+  },
+  {
+    name: "생수 페트병",
+    category: "재활용 쓰레기: 무색 페트병",
+    components: [
+      { name: "페트병 몸체", category: "무색 페트병" },
+      { name: "플라스틱 뚜껑", category: "플라스틱" },
+      { name: "라벨 비닐", category: "비닐류" },
+    ],
+    steps: [
+      "내용물을 깨끗이 비우고 물로 헹구어 줍니다.",
+      "라벨(비닐)을 떼어내어 비닐류로 분리배출합니다.",
+      "페트병을 압착하고 뚜껑을 닫아 무색페트병 수거함에 배출합니다.",
+    ],
+  },
+  {
+    name: "택배 상자",
+    category: "재활용 쓰레기: 종이류",
+    components: [
+      { name: "종이 상자", category: "종이" },
+      { name: "테이프 및 송장", category: "일반 쓰레기" },
+    ],
+    steps: [
+      "상자에 붙어 있는 비닐 테이프와 택배 송장을 완전히 제거합니다.",
+      "상자를 납작하게 접어서 종이 수거함에 배출합니다.",
+    ],
+  },
+];
 
 const CameraContainer = () => {
   const router = useRouter();
   const [state, setState] = useState<CameraState>("idle");
   const [hasCamera, setHasCamera] = useState<boolean>(true);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<TrashAnalysisResult | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -84,7 +126,16 @@ const CameraContainer = () => {
 
     // 모의 분석 딜레이
     setTimeout(() => {
-      setState(Math.random() > 0.15 ? "success" : "failure");
+      const isSuccessful = Math.random() > 0.15;
+      if (isSuccessful) {
+        const randomResult =
+          MOCK_ANALYSIS_RESULTS[Math.floor(Math.random() * MOCK_ANALYSIS_RESULTS.length)];
+        setAnalysisResult(randomResult);
+        setState("success");
+      } else {
+        setAnalysisResult(null);
+        setState("failure");
+      }
     }, 2000);
   }
 
@@ -98,7 +149,16 @@ const CameraContainer = () => {
         stopCamera();
         setState("analyzing");
         setTimeout(() => {
-          setState(Math.random() > 0.15 ? "success" : "failure");
+          const isSuccessful = Math.random() > 0.15;
+          if (isSuccessful) {
+            const randomResult =
+              MOCK_ANALYSIS_RESULTS[Math.floor(Math.random() * MOCK_ANALYSIS_RESULTS.length)];
+            setAnalysisResult(randomResult);
+            setState("success");
+          } else {
+            setAnalysisResult(null);
+            setState("failure");
+          }
         }, 2000);
       };
       reader.readAsDataURL(file);
@@ -108,6 +168,7 @@ const CameraContainer = () => {
   // 촬영 리셋 핸들러
   function handleReset() {
     setCapturedImage(null);
+    setAnalysisResult(null);
     setState("idle");
   }
 
@@ -132,6 +193,7 @@ const CameraContainer = () => {
     <CameraResult
       isSuccess={state === "success"}
       capturedImage={capturedImage}
+      analysisResult={analysisResult}
       onReset={handleReset}
       onNavigateChatbot={() => router.push("/chatbot")}
     />

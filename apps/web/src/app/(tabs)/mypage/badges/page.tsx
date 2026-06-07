@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 
+import Image from "next/image";
+
 import { Header } from "@/components/ui/header";
+import mockData from "@/data/mock";
 import { cn } from "@/lib/cn";
-import { BADGES } from "@/data/mock";
 
 const Page = () => {
   const router = useRouter();
@@ -15,7 +17,7 @@ const Page = () => {
 
       <div className="scrollbar-hide flex flex-1 flex-col overflow-y-auto p-4">
         <div className="my-auto flex flex-wrap justify-center gap-4">
-          {BADGES.map(badge => (
+          {mockData.BADGES.map(badge => (
             <div
               key={badge.id}
               className={cn(
@@ -24,8 +26,13 @@ const Page = () => {
                   ? "border-green-100 text-neutral-900"
                   : "relative border-neutral-100 text-neutral-900",
               )}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={badge.image} alt={badge.name} className="size-20 object-contain" />
+              <Image
+                src={badge.image}
+                alt={badge.name}
+                width={80}
+                height={80}
+                className="object-contain"
+              />
               <div className="flex flex-col gap-1 text-center">
                 <p className="body-4 leading-tight">{badge.name}</p>
                 <p className="body-5 leading-tight break-keep text-neutral-400">
