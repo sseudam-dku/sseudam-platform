@@ -43,6 +43,7 @@ function Avatar({ name, avatarUrl }: { name?: string; avatarUrl?: string }) {
   return (
     <div className="body-5 flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 text-neutral-600">
       {avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img src={avatarUrl} alt={name} className="size-full object-cover" />
       ) : (
         <span>{initials}</span>

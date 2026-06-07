@@ -12,7 +12,10 @@ interface ToastProps {
 const Toast = ({ message, duration = 2500, variant = "success", onClose }: ToastProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => {

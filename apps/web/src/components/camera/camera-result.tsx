@@ -27,6 +27,7 @@ const CameraResult = ({
           {/* 촬영한 사진 */}
           <div className="rounded-20 relative aspect-square w-full overflow-hidden border border-neutral-200 bg-neutral-800 shadow-md">
             {capturedImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src={capturedImage} alt="촬영한 사진" className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center">

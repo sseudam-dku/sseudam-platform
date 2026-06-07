@@ -24,6 +24,7 @@ const Page = () => {
                   ? "border-green-100 text-neutral-900"
                   : "relative border-neutral-100 text-neutral-900",
               )}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={badge.image} alt={badge.name} className="size-20 object-contain" />
               <div className="flex flex-col gap-1 text-center">
                 <p className="body-4 leading-tight">{badge.name}</p>

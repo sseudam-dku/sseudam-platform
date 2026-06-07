@@ -58,6 +58,7 @@ export function Profile({
           styles.avatar,
         )}>
         {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={avatarUrl}
             alt={`${name} 프로필`}

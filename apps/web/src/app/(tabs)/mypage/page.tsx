@@ -76,6 +76,7 @@ const Page = () => {
           {/* 뱃지 미리보기 */}
           <div className="flex justify-center gap-3">
             {BADGES.slice(0, 6).map(badge => (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={badge.id}
                 src={badge.image}
