@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { GoogleLoginButton } from "@/components/ui/social-login-button";
 
-export default function OnboardingPage() {
+const page = () => {
   return (
     <main className="flex min-h-dvh flex-col px-6 pt-[env(safe-area-inset-top)] pb-10">
       <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
@@ -25,4 +25,6 @@ export default function OnboardingPage() {
       </div>
     </main>
   );
-}
+};
+
+export default page;

@@ -42,7 +42,7 @@ const ACTIVITY = [
 
 const isLoggedIn = false;
 
-function StatsContent() {
+const StatsContent = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
@@ -76,9 +76,9 @@ function StatsContent() {
       </div>
     </div>
   );
-}
+};
 
-function BadgesContent() {
+const BadgesContent = () => {
   const earned = BADGES.filter(b => b.earned);
   const locked = BADGES.filter(b => !b.earned);
   return (
@@ -115,9 +115,9 @@ function BadgesContent() {
       </div>
     </div>
   );
-}
+};
 
-function ActivityContent() {
+const ActivityContent = () => {
   return (
     <div className="rounded-16 bg-white shadow-sm">
       {ACTIVITY.map((item, i) => (
@@ -141,9 +141,9 @@ function ActivityContent() {
       ))}
     </div>
   );
-}
+};
 
-export default function MyPage() {
+const Page = () => {
   const [tab, setTab] = useState<Tab>("stats");
 
   if (!isLoggedIn) {
@@ -217,4 +217,6 @@ export default function MyPage() {
       </div>
     </div>
   );
-}
+};
+
+export default Page;

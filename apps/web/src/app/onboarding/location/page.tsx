@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { SearchBar } from "@/components/ui/search-bar";
 
-export default function LocationSetupPage() {
+const Page = () => {
   const router = useRouter();
   const [query, setQuery] = useState("");
 
@@ -42,4 +42,6 @@ export default function LocationSetupPage() {
       </div>
     </div>
   );
-}
+};
+
+export default Page;

@@ -3,7 +3,7 @@ import { type ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 
-function GoogleIcon() {
+const GoogleIcon = () => {
   return (
     <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
       <path
@@ -24,13 +24,13 @@ function GoogleIcon() {
       />
     </svg>
   );
-}
+};
 
 export interface GoogleLoginButtonProps extends Omit<ComponentProps<typeof Button>, "variant"> {
   children?: React.ReactNode;
 }
 
-export function GoogleLoginButton({ className, children, ...props }: GoogleLoginButtonProps) {
+const GoogleLoginButton = ({ className, children, ...props }: GoogleLoginButtonProps) => {
   return (
     <Button
       variant="outline"
@@ -43,4 +43,7 @@ export function GoogleLoginButton({ className, children, ...props }: GoogleLogin
       {children ?? "Google로 계속하기"}
     </Button>
   );
-}
+};
+
+export { GoogleLoginButton };
+export default GoogleLoginButton;

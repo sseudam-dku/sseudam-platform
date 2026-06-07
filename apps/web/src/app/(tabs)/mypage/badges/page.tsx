@@ -16,7 +16,7 @@ const BADGES = [
   { id: "9", name: "동네 영웅", emoji: "🦸", earned: false },
 ];
 
-function BackIcon() {
+const BackIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -31,9 +31,9 @@ function BackIcon() {
       <path d="M15 18l-6-6 6-6" />
     </svg>
   );
-}
+};
 
-export default function BadgesPage() {
+const Page = () => {
   const router = useRouter();
 
   return (
@@ -70,4 +70,6 @@ export default function BadgesPage() {
       </div>
     </div>
   );
-}
+};
+
+export default Page;

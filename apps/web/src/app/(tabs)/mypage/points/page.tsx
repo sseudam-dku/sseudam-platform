@@ -10,7 +10,7 @@ const POINT_HISTORY = [
   { date: "2025.04.09", label: "캔·고철", points: 50 },
 ];
 
-function BackIcon() {
+const BackIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -25,9 +25,9 @@ function BackIcon() {
       <path d="M15 18l-6-6 6-6" />
     </svg>
   );
-}
+};
 
-export default function PointsPage() {
+const Page = () => {
   const router = useRouter();
 
   return (
@@ -66,4 +66,6 @@ export default function PointsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default Page;
