@@ -1,5 +1,6 @@
 "use client";
 
+import { Bot } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -71,8 +72,8 @@ export function ChatbotContainer() {
       {isEmpty ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-8 bg-neutral-100 p-6">
           <div className="flex flex-col items-center gap-3 text-center">
-            <div className="flex size-20 items-center justify-center rounded-full bg-white shadow-sm">
-              <span className="text-4xl">🤖</span>
+            <div className="flex size-20 items-center justify-center rounded-full bg-green-500 text-white shadow-md">
+              <Bot className="size-10" />
             </div>
             <div>
               <p className="head-4 text-neutral-900">안녕하세요!</p>

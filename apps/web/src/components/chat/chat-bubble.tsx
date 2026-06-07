@@ -1,4 +1,4 @@
-import { AlertCircle, Clock } from "lucide-react";
+import { AlertCircle, Bot, Clock } from "lucide-react";
 
 import { cn } from "@/lib/cn";
 
@@ -22,6 +22,14 @@ function StatusIcon({ status }: { status: ChatBubbleStatus }) {
 }
 
 function Avatar({ name, avatarUrl }: { name?: string; avatarUrl?: string }) {
+  if (name === "쓰담 AI") {
+    return (
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-green-500 text-white shadow-sm">
+        <Bot className="size-5" />
+      </div>
+    );
+  }
+
   const initials =
     name
       ?.trim()
