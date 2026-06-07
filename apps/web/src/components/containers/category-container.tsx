@@ -55,7 +55,7 @@ const GUIDE: Record<string, { method: string; caution: string }> = {
   },
 };
 
-function BackIcon() {
+const BackIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -70,9 +70,9 @@ function BackIcon() {
       <path d="M15 18l-6-6 6-6" />
     </svg>
   );
-}
+};
 
-export function CategoryContainer() {
+const CategoryContainer = () => {
   const [selected, setSelected] = useState<string | null>(null);
 
   const category = CATEGORIES.find(c => c.id === selected);
@@ -97,7 +97,7 @@ export function CategoryContainer() {
                 "rounded-20 flex items-center gap-4 p-5",
                 category.color.split(" ")[0],
               )}>
-              <span className="text-5xl">{category.emoji}</span>
+              <span className="head-1">{category.emoji}</span>
               <div>
                 <p className="head-4 text-neutral-900">{category.name}</p>
                 <p className={cn("body-5 mt-0.5", category.color.split(" ")[1])}>
@@ -107,16 +107,12 @@ export function CategoryContainer() {
             </div>
 
             <div className="rounded-16 bg-white p-4 shadow-sm">
-              <p className="body-5 mb-2 font-semibold tracking-widest text-neutral-400 uppercase">
-                배출 방법
-              </p>
+              <p className="body-5 mb-2 tracking-widest text-neutral-400 uppercase">배출 방법</p>
               <p className="body-2 text-neutral-800">{guide.method}</p>
             </div>
 
             <div className="rounded-16 bg-white p-4 shadow-sm">
-              <p className="body-5 mb-2 font-semibold tracking-widest text-amber-500 uppercase">
-                주의사항
-              </p>
+              <p className="body-5 mb-2 tracking-widest text-amber-500 uppercase">주의사항</p>
               <p className="body-2 text-neutral-700">{guide.caution}</p>
             </div>
           </div>
@@ -129,7 +125,7 @@ export function CategoryContainer() {
     <div className="scrollbar-hide flex-1 overflow-y-auto bg-neutral-100">
       <div className="flex flex-col gap-4 p-4">
         <div className="rounded-16 bg-white p-4 shadow-sm">
-          <p className="body-5 mb-3 font-semibold tracking-widest text-neutral-400 uppercase">
+          <p className="body-5 mb-3 tracking-widest text-neutral-400 uppercase">
             분리배출 카테고리
           </p>
           <div className="grid grid-cols-3 gap-3">
@@ -141,7 +137,7 @@ export function CategoryContainer() {
                   "rounded-12 flex cursor-pointer flex-col items-center gap-2 py-5 transition-all duration-200 hover:opacity-80 active:opacity-80",
                   cat.color.split(" ")[0],
                 )}>
-                <span className="text-3xl">{cat.emoji}</span>
+                <span className="head-1">{cat.emoji}</span>
                 <span className={cn("body-5", cat.color.split(" ")[1])}>{cat.name}</span>
               </button>
             ))}
@@ -150,4 +146,6 @@ export function CategoryContainer() {
       </div>
     </div>
   );
-}
+};
+
+export default CategoryContainer;

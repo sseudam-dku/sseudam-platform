@@ -1,5 +1,7 @@
-import { CameraContainer } from "@/components/containers/camera-container";
+import CameraContainer from "@/components/containers/camera-container";
 
-export default function CameraPage() {
+const page = () => {
   return <CameraContainer />;
-}
+};
+
+export default page;

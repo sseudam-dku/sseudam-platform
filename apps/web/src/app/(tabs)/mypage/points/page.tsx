@@ -59,7 +59,7 @@ const Page = () => {
                 <p className="body-3 text-neutral-900">{item.label}</p>
                 <p className="body-5 text-neutral-400">{item.date}</p>
               </div>
-              <span className="body-3 font-semibold text-green-500">+{item.points}P</span>
+              <span className="body-3 text-green-500">+{item.points}P</span>
             </div>
           ))}
         </div>

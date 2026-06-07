@@ -6,19 +6,19 @@ import { cn } from "@/lib/cn";
 const sizeStyles = {
   sm: {
     container: "gap-2",
-    avatar: "size-8 text-xs",
+    avatar: "size-8 body-5",
     name: "body-5 text-neutral-900",
     subtitle: "body-5 text-neutral-400",
   },
   md: {
     container: "gap-3",
-    avatar: "size-10 text-sm",
+    avatar: "size-10 body-4",
     name: "body-3 text-neutral-900",
     subtitle: "body-5 text-neutral-400",
   },
   lg: {
     container: "gap-3",
-    avatar: "size-12 text-base",
+    avatar: "size-12 body-2",
     name: "body-1 text-neutral-900",
     subtitle: "body-4 text-neutral-400",
   },
@@ -65,7 +65,7 @@ export function Profile({
             {...props}
           />
         ) : getInitials(name) ? (
-          <span className="font-medium">{getInitials(name)}</span>
+          <span className="">{getInitials(name)}</span>
         ) : (
           <User className="size-4 text-neutral-400" aria-hidden="true" />
         )}

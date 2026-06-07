@@ -56,7 +56,7 @@ const Page = () => {
                 "rounded-12 flex flex-col items-center gap-2 p-4",
                 badge.earned ? "bg-white shadow-sm" : "bg-neutral-50 opacity-50 grayscale",
               )}>
-              <span className="text-3xl">{badge.emoji}</span>
+              <span className="head-1">{badge.emoji}</span>
               <span
                 className={cn(
                   "body-5 text-center",

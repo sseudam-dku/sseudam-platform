@@ -276,3 +276,10 @@ body {
 @utility animate-page-exit {
   animation: page-exit 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+.mapboxgl-ctrl-logo {
+  display: none !important;
+}
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}

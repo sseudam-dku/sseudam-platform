@@ -65,8 +65,7 @@ export function TabBar({
             value={item.id}
             className={cn(
               "flex min-h-11 flex-1 flex-col items-center justify-center gap-1 text-neutral-400 focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:outline-none",
-              variant === "bottom" &&
-                "body-5 py-2 data-[state=active]:font-semibold data-[state=active]:text-green-500",
+              variant === "bottom" && "body-5 py-2 data-[state=active]:text-green-500",
               variant === "top" &&
                 "rounded-8 body-4 px-4 py-2 data-[state=active]:bg-neutral-50 data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm",
             )}>

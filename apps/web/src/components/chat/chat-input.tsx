@@ -4,6 +4,7 @@ import { Mic, MicOff } from "lucide-react";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { IconArrowUp } from "@/components/icons/arrow-up";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/toast";
 import { cn } from "@/lib/cn";
 
 interface ISpeechRecognition {
@@ -48,6 +49,7 @@ export function ChatInput({
   variant = "default",
 }: ChatInputProps) {
   const [value, setValue] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
@@ -101,7 +103,12 @@ export function ChatInput({
           if (transcript) {
             setValue(prev => {
               const trimmed = prev.trim();
-              return trimmed ? `${trimmed} ${transcript}` : transcript;
+              const combined = trimmed ? `${trimmed} ${transcript}` : transcript;
+              if (combined.length > 100) {
+                setToastMessage("최대 100자까지 입력할 수 있어요.");
+                return combined.slice(0, 100);
+              }
+              return combined;
             });
           }
         };
@@ -142,89 +149,116 @@ export function ChatInput({
     }
   }
 
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = event.target.value;
+    if (val.length > 100) {
+      setToastMessage("최대 100자까지 입력할 수 있어요.");
+      setValue(val.slice(0, 100));
+    } else {
+      setValue(val);
+    }
+  };
+
   const canSend = value.trim().length > 0 && !disabled;
 
-  if (variant === "chatbot") {
+  const renderInput = () => {
+    if (variant === "chatbot") {
+      return (
+        <div
+          className={cn(
+            "rounded-t-20 shrink-0 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_16px] shadow-neutral-900/10",
+            className,
+          )}>
+          <div className="flex items-end gap-3">
+            <button
+              type="button"
+              onClick={toggleListening}
+              aria-label={isListening ? "음성 입력 중지" : "음성 입력"}
+              className={cn(
+                "mb-0.5 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors",
+                isListening
+                  ? "animate-pulse bg-red-50 text-red-500"
+                  : "text-green-500 hover:bg-neutral-100",
+              )}>
+              {isListening ? (
+                <Mic className="size-6 animate-bounce" strokeWidth={2} />
+              ) : (
+                <MicOff className="size-6" strokeWidth={2} />
+              )}
+            </button>
+            <div className="rounded-20 flex flex-1 flex-col border border-transparent bg-neutral-100 px-4 py-2.5 focus-within:ring-2 focus-within:ring-green-500">
+              <textarea
+                ref={textareaRef}
+                value={value}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                disabled={disabled}
+                rows={1}
+                className="body-2 scrollbar-hide max-h-30 min-h-11 w-full resize-none bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400 disabled:opacity-50"
+              />
+              <span className="body-5 pointer-events-none mt-1 self-end text-neutral-400 select-none">
+                {value.length}/100
+              </span>
+            </div>
+            <button
+              type="button"
+              aria-label="메시지 보내기"
+              disabled={!canSend}
+              onClick={handleSend}
+              className={cn(
+                "flex size-11 shrink-0 items-center justify-center rounded-full bg-green-500 text-white transition-colors duration-200",
+                canSend ? "cursor-pointer hover:bg-green-600" : "cursor-not-allowed opacity-50",
+              )}>
+              <IconArrowUp className="size-5" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div
         className={cn(
-          "rounded-t-20 shrink-0 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_16px] shadow-neutral-900/10",
+          "border-t border-neutral-200 bg-neutral-50 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]",
           className,
         )}>
-        <div className="flex items-center gap-3">
-          <button
+        <div className="flex items-end gap-2">
+          <div className="rounded-12 flex flex-1 flex-col border border-transparent bg-neutral-100 px-4 py-2.5 focus-within:ring-2 focus-within:ring-green-500">
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              disabled={disabled}
+              rows={1}
+              className="body-2 max-h-30 min-h-12 w-full resize-none bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400 disabled:opacity-50"
+            />
+            <span className="body-5 pointer-events-none mt-1 self-end text-neutral-400 select-none">
+              {value.length}/100
+            </span>
+          </div>
+          <Button
             type="button"
-            onClick={toggleListening}
-            aria-label={isListening ? "음성 입력 중지" : "음성 입력"}
-            className={cn(
-              "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors",
-              isListening
-                ? "animate-pulse bg-red-50 text-red-500"
-                : "text-green-500 hover:bg-neutral-100",
-            )}>
-            {isListening ? (
-              <Mic className="size-6 animate-bounce" strokeWidth={2} />
-            ) : (
-              <MicOff className="size-6" strokeWidth={2} />
-            )}
-          </button>
-          <input
-            value={value}
-            onChange={event => setValue(event.target.value)}
-            onKeyDown={event => {
-              if (event.nativeEvent.isComposing) return;
-              if (event.key === "Enter") {
-                event.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder={placeholder}
-            disabled={disabled}
-            className="body-2 h-11 min-w-0 flex-1 rounded-full bg-neutral-100 px-4 text-neutral-900 outline-none placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50"
-          />
-          <button
-            type="button"
-            aria-label="메시지 보내기"
+            size="md"
+            className="size-12 min-w-12 shrink-0 rounded-full px-0"
             disabled={!canSend}
             onClick={handleSend}
-            className={cn(
-              "flex size-11 shrink-0 items-center justify-center rounded-full bg-green-500 text-white transition-colors duration-200",
-              canSend ? "cursor-pointer hover:bg-green-600" : "cursor-not-allowed opacity-50",
-            )}>
+            aria-label="메시지 보내기">
             <IconArrowUp className="size-5" />
-          </button>
+          </Button>
         </div>
       </div>
     );
-  }
+  };
 
   return (
-    <div
-      className={cn(
-        "border-t border-neutral-200 bg-neutral-50 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]",
-        className,
-      )}>
-      <div className="flex items-end gap-2">
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={event => setValue(event.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          disabled={disabled}
-          rows={1}
-          className="rounded-12 body-2 max-h-[120px] min-h-12 flex-1 resize-none bg-neutral-100 px-4 py-3 text-neutral-900 outline-none placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50"
-        />
-        <Button
-          type="button"
-          size="md"
-          className="size-12 min-w-12 shrink-0 rounded-full px-0"
-          disabled={!canSend}
-          onClick={handleSend}
-          aria-label="메시지 보내기">
-          <IconArrowUp className="size-5" />
-        </Button>
-      </div>
-    </div>
+    <>
+      {renderInput()}
+      {toastMessage && (
+        <Toast message={toastMessage} variant="error" onClose={() => setToastMessage("")} />
+      )}
+    </>
   );
 }

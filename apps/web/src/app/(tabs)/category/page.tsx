@@ -1,5 +1,7 @@
-import { CategoryContainer } from "@/components/containers/category-container";
+import CategoryContainer from "@/components/containers/category-container";
 
-export default function CategoryPage() {
+const page = () => {
   return <CategoryContainer />;
-}
+};
+
+export default page;

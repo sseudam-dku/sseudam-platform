@@ -54,11 +54,10 @@ function NavItemLink({ item, active }: { item: NavItem; active: boolean }) {
       className={cn(
         "body-5 flex min-h-13 flex-1 flex-col items-center justify-center gap-1 py-2 transition-colors",
         colorClass,
-        active ? "font-semibold" : "font-medium",
+        active ? "" : "",
       )}>
       <span className={cn("size-8 [&>svg]:size-8", colorClass)}>{item.icon}</span>
-      <span
-        className={cn("body-5 w-full truncate text-center", colorClass, active && "font-semibold")}>
+      <span className={cn("body-5 w-full truncate text-center", colorClass, active && "")}>
         {item.label}
       </span>
     </Link>
@@ -101,6 +100,12 @@ export function BottomNav() {
         href="/camera"
         prefetch={false}
         aria-label="카메라"
+        onClick={e => {
+          if (isCameraActive) {
+            e.preventDefault();
+            window.location.href = "/camera";
+          }
+        }}
         className={cn(
           "absolute top-3 left-1/2 flex size-18 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-green-500 text-white shadow-md",
           isCameraActive && "ring-2 ring-green-500/40 ring-offset-2",
