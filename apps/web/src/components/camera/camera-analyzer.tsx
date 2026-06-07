@@ -1,7 +1,7 @@
 "use client";
 
 import Lottie from "lottie-react";
-import globeAnimation from "../../../public/lottie/globe.json";
+import globeAnimation from "../../../public/lottie/Globe.json";
 
 export function CameraAnalyzer() {
   return (
