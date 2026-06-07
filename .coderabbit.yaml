@@ -1,0 +1,164 @@
+# ─────────────────────────────────────────
+# 🌐 언어 설정
+# ─────────────────────────────────────────
+language: "ko-KR"
+
+# ─────────────────────────────────────────
+# 🔍 코드래빗 리뷰 기본 설정
+# ─────────────────────────────────────────
+reviews:
+  # 리뷰 강도 프로필
+  # - "chill"     : 버그/보안 등 중요한 이슈만 코멘트
+  profile: "chill"
+
+  # PR에 변경 요청(Request Changes) 기능 사용 여부
+  # false → 항상 Comment로만 남김 (머지 차단 없음)
+  request_changes_workflow: false
+
+  # PR 상단에 전체 요약(High Level Summary) 자동 생성 여부
+  # false → 요약 없음
+  high_level_summary: false
+
+  # 리뷰 완료 후 축하 시(poem) 생성 여부
+  # false → 시 없음
+  poem: false
+
+  # 리뷰 상태 코멘트 표시 여부
+  # true  → "리뷰 시작", "리뷰 완료" 등 상태를 코멘트로 알려줌
+  review_status: true
+
+  # 워크스루(파일별 변경 설명) 섹션을 기본으로 접어둘지 여부
+  # false → 펼친 상태로 표시
+  collapse_walkthrough: false
+
+  # 시퀀스 다이어그램 자동 생성 여부 (API 흐름 등이 변경됐을 때)
+  # false → 다이어그램 없음
+  sequence_diagrams: false
+
+  # 변경된 파일 목록 요약 표시 여부
+  # true  → PR에서 변경된 파일 목록을 요약해서 보여줌
+  changed_files_summary: true
+
+  # 자동 리뷰 설정
+  auto_review:
+    # 자동 리뷰 활성화 여부
+    # true  → PR 열리거나 커밋 추가되면 자동으로 리뷰
+    enabled: true
+
+    # 드래프트 PR도 리뷰할지 여부
+    # false → 드래프트 PR은 리뷰 안 함
+    drafts: false
+
+    # 증분 리뷰 여부 (새 커밋이 추가됐을 때 전체 재리뷰 vs 변경분만 리뷰)
+    # true  → 새 커밋의 변경분만 리뷰
+    auto_incremental_review: true
+
+    # 특정 브랜치로 들어오는 PR만 리뷰할지 여부
+    base_branches:
+      - "dev" # dev 브랜치로 들어오는 PR 리뷰
+
+  # ── 리뷰에서 제외할 파일/폴더 패턴 ──────────────
+  # "!" 접두사 = 제외
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/.next/**"
+    - "!**/coverage/**"
+    - "!**/__snapshots__/**"
+    - "!**/*.lock"
+    - "!**/pnpm-lock.yaml"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+    - "!**/__generated__/**"
+    - "!**/*.generated.*"
+    - "!**/public/**"
+    - "!**/.pnpm-store/**"
+
+  # ── 경로별 맞춤 리뷰 지침 ────────────────────────
+  path_instructions:
+    # ── 프론트엔드 (apps/web) ──────────────────────
+    - path: "apps/web/src/components/**"
+      instructions: |
+        React 컴포넌트를 리뷰할 때 다음을 확인해주세요:
+        - 컴포넌트는 화살표 함수로 작성 후 export default로 내보내는지 확인 (ex. const Button = () => { ... }; export default Button;)
+        - 컴포넌트명은 PascalCase인지, 파일명(kebab-case)과 대응되는지 확인
+        - 컴포넌트는 역할별 폴더(ui/, layout/, icons/, chat/, tabs/)에 위치하는지 확인
+        - 불필요한 re-render를 유발하는 코드가 없는지
+
+    - path: "apps/web/src/app/**/page.tsx"
+      instructions: |
+        페이지 파일을 리뷰할 때 다음을 확인해주세요:
+        - 파일명은 page.tsx로 통일
+        - 컴포넌트는 반드시 화살표 함수 + 변수 선언 방식으로 작성 (export default function Page() 형식 사용 금지)
+        - 페이지 컴포넌트는 export default로 내보내야 함 (named export 아님)
+        - 훅 사용 여부에 따라 변수명 대소문자를 구분:
+          - 훅을 사용하지 않는 정적 페이지 → 소문자 page (ex. const page = () => {}; export default page;)
+          - 훅(useState, useEffect 등)을 사용하는 페이지 → 대문자 Page (ex. const Page = () => {}; export default Page;)
+
+    - path: "apps/web/src/lib/**"
+      instructions: |
+        유틸리티/API 클라이언트 코드를 리뷰할 때 다음을 확인해주세요:
+        - API 함수명은 "fetch/send/delete + 리소스명" 형식인지 확인
+        - try/catch는 lib/ 함수 내부가 아닌, 호출부(컴포넌트 또는 hook)에서 작성해야 함
+        - 토큰, 키 등 민감한 정보가 하드코딩되어 있지 않은지 확인
+        - console.log가 남아있으면 반드시 지적
+
+    # ── 백엔드 (apps/server) ───────────────────────
+    - path: "apps/server/src/**/*.controller.ts"
+      instructions: |
+        NestJS 컨트롤러를 리뷰할 때 다음을 확인해주세요:
+        - 컨트롤러는 라우팅과 입력 검증만 담당하고, 비즈니스 로직은 서비스에 위임하는지 확인
+        - DTO를 사용하여 요청 데이터를 검증하는지 확인
+        - Swagger 데코레이터(@ApiTags, @ApiOperation 등)가 적용되어 있는지 확인
+        - 민감한 정보가 응답에 노출되지 않는지 확인
+
+    - path: "apps/server/src/**/*.service.ts"
+      instructions: |
+        NestJS 서비스를 리뷰할 때 다음을 확인해주세요:
+        - SQL 쿼리에 파라미터 바인딩($1, $2)을 사용하여 SQL Injection을 방지하는지 확인
+        - 에러 처리가 적절한 NestJS 예외(HttpException 등)를 사용하는지 확인
+        - 외부 API 호출 시 타임아웃과 에러 처리가 있는지 확인
+        - console.log가 남아있으면 반드시 지적
+
+    - path: "apps/server/src/**/models/**"
+      instructions: |
+        DTO/모델 파일을 리뷰할 때 다음을 확인해주세요:
+        - class-validator 데코레이터(@IsString, @IsOptional 등)가 적절히 적용되어 있는지 확인
+        - any 타입 사용 지양
+
+  # ── 전체 공통 리뷰 지침 ──────────────────────────
+  instructions: |
+    이 프로젝트는 pnpm 모노레포(apps/web: Next.js, apps/server: NestJS)입니다.
+    다음 팀 컨벤션을 기준으로 리뷰해주세요:
+    - 커밋 메시지는 "지라티켓번호 [타입] 작업내용" 형식을 따릅니다 (ex. GRT-35 [UI] 로그인 페이지 구현)
+    - 커밋 타입은 대괄호 안에 대문자로 작성합니다: [FEAT], [MOD], [ADD], [CHORE], [DEL], [UI], [FIX], [MOVE], [RENAME], [REFACTOR], [DOCS], [STYLE]
+    - 커밋 메시지 형식이 지켜지지 않은 경우, 틀렸다고 지적하기보다 올바른 형식으로 다음 커밋부터 작성할 수 있도록 부드럽게 제안해주세요
+    - 브랜치명은 feature/#지라티켓번호-작업명 또는 hotfix/#지라티켓번호-작업명 형식을 따릅니다 (ex. feature/#GRT-35-common_components)
+    - TypeScript에서 any 타입 사용은 지양합니다
+    - 코드 스타일(포매팅)은 Prettier가 담당하므로 리뷰하지 않아도 됩니다
+    - PR 제출 시 console.log는 반드시 제거되어야 합니다
+
+# ─────────────────────────────────────────
+# 💬 채팅(코멘트 답변) 설정
+# ─────────────────────────────────────────
+chat:
+  # CodeRabbit 리뷰 코멘트에 답글 달았을 때 자동으로 응답할지 여부
+  # false → @coderabbitai 멘션해야만 응답
+  auto_reply: false
+
+# ─────────────────────────────────────────
+# 🧠 지식베이스 설정
+# ─────────────────────────────────────────
+knowledge_base:
+  # 지식베이스 사용 거부 여부
+  # false → 지식베이스 사용 (PR 패턴, 팀 학습 내용 축적)
+  opt_out: false
+
+  # 웹 검색 허용 여부 (리뷰 중 최신 라이브러리 정보 등 참조)
+  web_search:
+    enabled: true
+
+  # 학습 범위 설정
+  learnings:
+    # "local"  → 현재 레포지토리만 학습
+    scope: local
