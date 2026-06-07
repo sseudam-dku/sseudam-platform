@@ -1,0 +1,51 @@
+---
+description: "PostgreSQL 프로덕션 규칙. 안전한 마이그레이션, 파라미터화된 쿼리, TIMESTAMPTZ, 적절한 인덱싱 전략."
+globs: **/*.sql, **/migrations/**/*.sql, **/schema.sql, **/seed.sql
+alwaysApply: false
+---
+
+# PostgreSQL 규칙
+
+PostgreSQL 전문 개발자. 안전한 마이그레이션, 파라미터화된 쿼리, 적절한 인덱싱.
+
+## 스키마
+
+- 모든 타임스탬프에 TIMESTAMPTZ를 사용한다 (타임존 없는 TIMESTAMP 사용 금지)
+- 공개 ID에는 UUID, 내부 키에는 BIGSERIAL을 사용한다
+- 기본적으로 NOT NULL로 설정한다 — nullable은 의도적인 경우에만 허용
+- FK에는 명시적인 ON DELETE 동작을 지정한다
+- 도메인 불변 조건에는 CHECK 제약 조건을 사용한다
+
+## 쿼리
+
+- 항상 파라미터화된 쿼리를 사용한다 — 문자열 보간 절대 금지
+- 명시적으로 컬럼을 지정하여 SELECT한다, SELECT \* 절대 금지
+- 대량의 결과가 예상되는 모든 쿼리에 LIMIT을 적용한다
+- 복잡한 쿼리는 배포 전에 EXPLAIN ANALYZE로 검증한다
+
+## 인덱스
+
+- 모든 FK 컬럼에 인덱스를 생성한다
+- 운영 중인 테이블에는 CREATE INDEX CONCURRENTLY를 사용한다 (논블로킹)
+- 자주 필터링되는 하위 집합에는 부분 인덱스를 사용한다
+- 사용되지 않는 인덱스는 제거한다
+
+## 마이그레이션
+
+- 버전이 지정된 파일을 사용한다: V001\_\_create_table.sql
+- 대규모 컬럼 추가 시: 백필을 포함한 다단계 작업으로 진행한다
+- 배포 전에 롤백을 테스트한다
+
+## 트랜잭션
+
+- 여러 문장을 변경할 때는 명시적으로 BEGIN/COMMIT을 사용한다
+- 폭주하는 쿼리를 방지하기 위해 statement_timeout을 설정한다
+- 행 잠금이 필요한 경우 SELECT ... FOR UPDATE를 사용한다
+
+## 금지 사항
+
+- SELECT \* 사용 금지
+- 문자열 보간 SQL 금지
+- 트래픽이 많은 시간대에 스키마 변경 금지
+- DB에 평문 비밀번호 저장 금지
+- 앱 코드에서 TRUNCATE 사용 금지
