@@ -1,10 +1,9 @@
 "use client";
 
-import { Mic, MicOff } from "lucide-react";
+import { ArrowUp, Mic, MicOff } from "lucide-react";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
-import { IconArrowUp } from "@/components/icons/arrow-up";
 import { Button } from "@/components/ui/button";
-import { Toast } from "@/components/ui/toast";
+import Toast from "@/components/ui/toast";
 import { cn } from "@/lib/cn";
 
 interface ISpeechRecognition {
@@ -19,14 +18,19 @@ interface ISpeechRecognition {
   stop(): void;
 }
 
+interface ISpeechRecognitionResult {
+  [index: number]: { transcript: string };
+  isFinal: boolean;
+}
+
+interface ISpeechRecognitionResultList {
+  [index: number]: ISpeechRecognitionResult;
+  length: number;
+}
+
 interface ISpeechRecognitionEvent {
-  results: {
-    [index: number]: {
-      [index: number]: {
-        transcript: string;
-      };
-    };
-  };
+  results: ISpeechRecognitionResultList;
+  resultIndex: number;
 }
 
 interface ISpeechRecognitionErrorEvent {
@@ -53,6 +57,7 @@ export function ChatInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
+  const preVoiceTextRef = useRef("");
 
   useEffect(() => {
     return () => {
@@ -82,9 +87,11 @@ export function ChatInput({
     } else {
       try {
         const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
+        recognition.continuous = true;
+        recognition.interimResults = true;
         recognition.lang = "ko-KR";
+
+        preVoiceTextRef.current = value;
 
         recognition.onstart = () => {
           setIsListening(true);
@@ -99,17 +106,26 @@ export function ChatInput({
         };
 
         recognition.onresult = (event: ISpeechRecognitionEvent) => {
-          const transcript = event.results[0][0].transcript;
-          if (transcript) {
-            setValue(prev => {
-              const trimmed = prev.trim();
-              const combined = trimmed ? `${trimmed} ${transcript}` : transcript;
-              if (combined.length > 100) {
-                setToastMessage("최대 100자까지 입력할 수 있어요.");
-                return combined.slice(0, 100);
-              }
-              return combined;
-            });
+          let finalText = "";
+          let interimText = "";
+
+          for (let i = 0; i < event.results.length; i++) {
+            const result = event.results[i];
+            if (result.isFinal) {
+              finalText += result[0].transcript;
+            } else {
+              interimText += result[0].transcript;
+            }
+          }
+
+          const base = preVoiceTextRef.current.trim();
+          const combined = [base, finalText, interimText].filter(Boolean).join(" ");
+
+          if (combined.length > 100) {
+            setToastMessage("최대 100자까지 입력할 수 있어요.");
+            setValue(combined.slice(0, 100));
+          } else {
+            setValue(combined);
           }
         };
 
@@ -210,7 +226,7 @@ export function ChatInput({
                 "flex size-11 shrink-0 items-center justify-center rounded-full bg-green-500 text-white transition-colors duration-200",
                 canSend ? "cursor-pointer hover:bg-green-600" : "cursor-not-allowed opacity-50",
               )}>
-              <IconArrowUp className="size-5" />
+              <ArrowUp className="size-5" />
             </button>
           </div>
         </div>
@@ -246,7 +262,7 @@ export function ChatInput({
             disabled={!canSend}
             onClick={handleSend}
             aria-label="메시지 보내기">
-            <IconArrowUp className="size-5" />
+            <ArrowUp className="size-5" />
           </Button>
         </div>
       </div>

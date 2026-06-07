@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ToastProps {
   message: string;
@@ -9,8 +9,10 @@ interface ToastProps {
   onClose: () => void;
 }
 
-export function Toast({ message, duration = 2500, variant = "success", onClose }: ToastProps) {
+const Toast = ({ message, duration = 2500, variant = "success", onClose }: ToastProps) => {
   const [isVisible, setIsVisible] = useState(true);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => {
@@ -18,28 +20,30 @@ export function Toast({ message, duration = 2500, variant = "success", onClose }
     }, duration - 300);
 
     const closeTimer = setTimeout(() => {
-      onClose();
+      onCloseRef.current();
     }, duration);
 
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(closeTimer);
     };
-  }, [duration, onClose]);
+  }, [duration]);
 
-  const styleClass =
-    variant === "error"
-      ? "border-red-200 bg-red-50 text-red-600"
-      : "border-neutral-200 bg-white text-neutral-900";
+  const isError = variant === "error";
+  const styleClass = isError
+    ? "border-red-200 bg-red-50 text-red-600"
+    : "border-neutral-200 bg-white text-neutral-900";
 
   return (
     <div
       className={`rounded-12 fixed top-20 left-1/2 z-50 w-[calc(100%-var(--spacing-8))] max-w-xs -translate-x-1/2 border p-4 text-center shadow-lg transition-all duration-300 ${styleClass} ${
         isVisible ? "translate-y-0 scale-100 opacity-100" : "-translate-y-2 scale-95 opacity-0"
       }`}
-      role="status"
-      aria-live="polite">
+      role={isError ? "alert" : "status"}
+      aria-live={isError ? "assertive" : "polite"}>
       <p className="body-4">{message}</p>
     </div>
   );
-}
+};
+
+export default Toast;

@@ -1,14 +1,10 @@
 "use client";
 
+import { Camera, FileText, Home, MessageSquareText, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode } from "react";
 
-import { IconCamera } from "@/components/icons/camera";
-import { IconChatbot } from "@/components/icons/chatbot";
-import { IconHome } from "@/components/icons/home";
-import { IconRecord } from "@/components/icons/record";
-import { IconUser } from "@/components/icons/user";
 import { cn } from "@/lib/cn";
 
 type NavItem = {
@@ -21,12 +17,12 @@ const LEFT_NAV_ITEMS: NavItem[] = [
   {
     href: "/",
     label: "홈",
-    icon: <IconHome />,
+    icon: <Home />,
   },
   {
     href: "/chatbot",
     label: "챗봇",
-    icon: <IconChatbot />,
+    icon: <MessageSquareText />,
   },
 ];
 
@@ -34,12 +30,12 @@ const RIGHT_NAV_ITEMS: NavItem[] = [
   {
     href: "/records",
     label: "최근기록",
-    icon: <IconRecord />,
+    icon: <FileText />,
   },
   {
     href: "/mypage",
     label: "마이페이지",
-    icon: <IconUser />,
+    icon: <User />,
   },
 ];
 
@@ -110,7 +106,7 @@ export function BottomNav() {
           "absolute top-3 left-1/2 flex size-18 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-green-500 text-white shadow-md",
           isCameraActive && "ring-2 ring-green-500/40 ring-offset-2",
         )}>
-        <IconCamera className="size-8" />
+        <Camera className="size-8" />
       </Link>
     </nav>
   );

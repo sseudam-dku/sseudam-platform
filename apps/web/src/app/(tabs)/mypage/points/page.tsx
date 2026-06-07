@@ -1,67 +1,53 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import iconPoint from "@/assets/icon-point.svg";
+import { Header } from "@/components/ui/header";
 import { cn } from "@/lib/cn";
-
-const POINT_HISTORY = [
-  { date: "2025.05.23", label: "플라스틱", points: 100 },
-  { date: "2025.04.22", label: "종이박스", points: 100 },
-  { date: "2025.04.09", label: "캔·고철", points: 50 },
-];
-
-const BackIcon = () => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round">
-      <path d="M15 18l-6-6 6-6" />
-    </svg>
-  );
-};
+import { ACTIVITY } from "@/data/mock";
 
 const Page = () => {
   const router = useRouter();
 
   return (
-    <div className="scrollbar-hide flex-1 overflow-y-auto bg-neutral-100">
-      <div className="flex flex-col gap-3 p-4">
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => router.back()}
-            className="flex size-9 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-200">
-            <BackIcon />
-          </button>
-          <span className="head-5 text-neutral-900">나의 포인트</span>
+    <div className="flex flex-1 flex-col overflow-hidden bg-neutral-100">
+      <Header title="나의 포인트" onBack={() => router.back()} />
+
+      <div className="scrollbar-hide flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+        {/* 총 포인트 카드 */}
+        <div className="rounded-20 flex items-center justify-between border border-neutral-100/50 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-1">
+            <span className="body-5 tracking-wider text-neutral-400 uppercase">총 포인트</span>
+            <span className="head-1 text-neutral-900">250 P</span>
+            <span className="body-5 mt-1 text-neutral-500">누적 65 포인트 획득</span>
+          </div>
+          <Image src={iconPoint} alt="포인트" width={48} height={48} />
         </div>
 
-        <div className="rounded-16 bg-white p-4 shadow-sm">
-          <p className="body-5 text-neutral-400">총 포인트</p>
-          <p className="head-3 mt-1 text-neutral-900">250 P</p>
-        </div>
-
-        <div className="rounded-16 bg-white shadow-sm">
-          {POINT_HISTORY.map((item, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex items-center justify-between px-4 py-3",
-                i < POINT_HISTORY.length - 1 && "border-b border-neutral-100",
-              )}>
-              <div>
-                <p className="body-3 text-neutral-900">{item.label}</p>
-                <p className="body-5 text-neutral-400">{item.date}</p>
+        {/* 상세 적립 내역 */}
+        <div className="flex flex-col gap-3">
+          <h2 className="body-5 px-1 tracking-widest text-neutral-400 uppercase">상세 적립 내역</h2>
+          <div className="rounded-20 overflow-hidden border border-neutral-100/50 bg-white shadow-sm">
+            {ACTIVITY.map((item, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "flex items-center justify-between px-5 py-4 transition-colors hover:bg-neutral-50",
+                  i < ACTIVITY.length - 1 && "border-b border-neutral-100",
+                )}>
+                <div className="flex items-center gap-3.5">
+                  <Image src={iconPoint} alt="포인트" width={28} height={28} className="shrink-0" />
+                  <div>
+                    <p className="body-3 text-neutral-800">{item.category}</p>
+                    <p className="body-5 mt-0.5 text-neutral-400">{item.date}</p>
+                  </div>
+                </div>
+                <span className="body-3 text-green-500">+{item.points}P</span>
               </div>
-              <span className="body-3 text-green-500">+{item.points}P</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

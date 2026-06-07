@@ -1,8 +1,6 @@
 "use client";
 
-import { RotateCw } from "lucide-react";
-import { IconCamera } from "@/components/icons/camera";
-import { IconChatbot } from "@/components/icons/chatbot";
+import { Camera, MessageSquareText, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocationStore } from "@/lib/store/use-location-store";
 
@@ -13,12 +11,12 @@ interface CameraResultProps {
   onNavigateChatbot: () => void;
 }
 
-export function CameraResult({
+const CameraResult = ({
   isSuccess,
   capturedImage,
   onReset,
   onNavigateChatbot,
-}: CameraResultProps) {
+}: CameraResultProps) => {
   const { location } = useLocationStore();
   const district = location.split(" ").pop() || "마포구";
 
@@ -32,7 +30,7 @@ export function CameraResult({
               <img src={capturedImage} alt="촬영한 사진" className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
-                <IconCamera className="size-12 text-neutral-600" />
+                <Camera className="size-12 text-neutral-600" />
               </div>
             )}
           </div>
@@ -100,7 +98,7 @@ export function CameraResult({
               size="md"
               className="w-full cursor-pointer rounded-full transition-all hover:opacity-90 active:scale-[0.98]"
               onClick={onNavigateChatbot}>
-              <IconChatbot className="mr-1.5 size-4" />더 궁금한 내용은 챗봇에게 질문하기
+              <MessageSquareText className="mr-1.5 size-4" />더 궁금한 내용은 챗봇에게 질문하기
             </Button>
             <Button
               variant="outline"
@@ -162,4 +160,6 @@ export function CameraResult({
       </div>
     </div>
   );
-}
+};
+
+export default CameraResult;

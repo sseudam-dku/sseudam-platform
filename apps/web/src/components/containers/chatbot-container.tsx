@@ -36,13 +36,34 @@ export function ChatbotContainer() {
 
     const userMsg: Message = { role: "user", content: text, status: "sent", timestamp: timeString };
     const reply = MOCK_REPLIES[text] ?? MOCK_REPLIES.default;
+
+    setMessages(prev => [...prev, userMsg]);
+
+    // 타이핑 효과로 봇 메시지 추가
+    let charIndex = 0;
     const botMsg: Message = {
       role: "assistant",
-      content: reply,
+      content: "",
       senderName: "분리수거 도우미",
       timestamp: timeString,
     };
-    setMessages(prev => [...prev, userMsg, botMsg]);
+
+    setMessages(prev => [...prev, botMsg]);
+
+    const interval = setInterval(() => {
+      charIndex++;
+      setMessages(prev => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last && last.role === "assistant") {
+          updated[updated.length - 1] = { ...last, content: reply.slice(0, charIndex) };
+        }
+        return updated;
+      });
+      if (charIndex >= reply.length) {
+        clearInterval(interval);
+      }
+    }, 30);
   }
 
   const isEmpty = messages.length === 0;

@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { CameraScanner } from "../camera/camera-scanner";
+import CameraScanner from "../camera/camera-scanner";
 import { CameraAnalyzer } from "../camera/camera-analyzer";
-import { CameraResult } from "../camera/camera-result";
+import CameraResult from "../camera/camera-result";
 
 type CameraState = "idle" | "analyzing" | "success" | "failure";
 

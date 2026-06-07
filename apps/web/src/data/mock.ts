@@ -1,22 +1,73 @@
-export const STATS = [
+interface Stat {
+  label: string;
+  value: string;
+  color: string;
+}
+
+interface Category {
+  name: string;
+  percent: number;
+  color: string;
+}
+
+interface Badge {
+  id: string;
+  name: string;
+  emoji: string;
+  image: string;
+  description: string;
+  reward: string;
+  earned: boolean;
+}
+
+interface Activity {
+  date: string;
+  category: string;
+  points: number;
+}
+
+interface MockRecord {
+  id: string;
+  date: string;
+  category: string;
+  name: string;
+  points: number;
+  status: string;
+  emoji: string;
+}
+
+interface HomeCategory {
+  id: string;
+  name: string;
+  emoji: string;
+  href: string;
+}
+
+interface QuickAction {
+  emoji: string;
+  label: string;
+}
+
+export const STATS: Stat[] = [
   { label: "분리배출", value: "24회", color: "text-green-500" },
   { label: "획득 포인트", value: "250P", color: "text-amber-500" },
   { label: "이번 달", value: "8회", color: "text-blue-500" },
   { label: "연속 달성", value: "3일", color: "text-rose-500" },
 ];
 
-export const CATEGORIES = [
+export const CATEGORIES: Category[] = [
   { name: "플라스틱", percent: 45, color: "bg-orange-400" },
   { name: "종이·박스", percent: 30, color: "bg-blue-400" },
   { name: "캔·금속", percent: 15, color: "bg-yellow-400" },
   { name: "유리", percent: 10, color: "bg-teal-400" },
 ];
 
-export const BADGES = [
+export const BADGES: Badge[] = [
   {
     id: "1",
     name: "연속 3일",
     emoji: "🔥",
+    image: "/assets/badge/3days-master-badge.svg",
     description: "서비스에 3일 연속 빠짐없이 쓰레기 촬영을 완료한 경우",
     reward: "+300P",
     earned: true,
@@ -25,6 +76,7 @@ export const BADGES = [
     id: "2",
     name: "분리수거 마스터",
     emoji: "🏆",
+    image: "/assets/badge/all-trash-master-badge.svg",
     description: "서비스에 등록된 모든 종류의 쓰레기를 최소 한 번씩 모두 사진 촬영을 완료한 경우",
     reward: "+500P",
     earned: true,
@@ -33,7 +85,8 @@ export const BADGES = [
     id: "3",
     name: "비닐 수집가",
     emoji: "🛍️",
-    description: "“비닐” 항목으로 분류되는 쓰레기를 총 3번 이상 사진 촬영 완료한 경우",
+    image: "/assets/badge/vinyl-master-badge.svg",
+    description: "'비닐' 항목으로 분류되는 쓰레기를 총 3번 이상 사진 촬영 완료한 경우",
     reward: "+100P",
     earned: false,
   },
@@ -41,7 +94,8 @@ export const BADGES = [
     id: "4",
     name: "플라스틱 수집가",
     emoji: "🧴",
-    description: "“플라스틱” 항목으로 분류되는 쓰레기를 총 3번 이상 사진 촬영 완료한 경우",
+    image: "/assets/badge/plastic-master-badge.svg",
+    description: "'플라스틱' 항목으로 분류되는 쓰레기를 총 3번 이상 사진 촬영 완료한 경우",
     reward: "+100P",
     earned: true,
   },
@@ -49,13 +103,14 @@ export const BADGES = [
     id: "5",
     name: "종이 수집가",
     emoji: "📦",
-    description: "“종이” 항목으로 분류되는 쓰레기를 총 3번 이상 사진 촬영 완료한 경우",
+    image: "/assets/badge/paper-master-badge.svg",
+    description: "'종이' 항목으로 분류되는 쓰레기를 총 3번 이상 사진 촬영 완료한 경우",
     reward: "+100P",
     earned: false,
   },
 ];
 
-export const ACTIVITY = [
+export const ACTIVITY: Activity[] = [
   { date: "2024.05.28", category: "플라스틱 분리배출", points: 10 },
   { date: "2024.05.27", category: "종이·박스 분리배출", points: 10 },
   { date: "2024.05.26", category: "캔·금속 분리배출", points: 15 },
@@ -63,7 +118,7 @@ export const ACTIVITY = [
   { date: "2024.05.24", category: "플라스틱 분리배출", points: 10 },
 ];
 
-export const MOCK_RECORDS = [
+export const MOCK_RECORDS: MockRecord[] = [
   {
     id: "1",
     date: "2026-06-07 14:30",
@@ -111,7 +166,7 @@ export const MOCK_RECORDS = [
   },
 ];
 
-export const HOME_CATEGORIES = [
+export const HOME_CATEGORIES: HomeCategory[] = [
   { id: "plastic", name: "플라스틱", emoji: "🧴", href: "/category" },
   { id: "paper", name: "종이·박스", emoji: "📦", href: "/category" },
   { id: "glass", name: "유리", emoji: "🍶", href: "/category" },
@@ -120,7 +175,7 @@ export const HOME_CATEGORIES = [
   { id: "styrofoam", name: "스티로폼", emoji: "📫", href: "/category" },
 ];
 
-export const QUICK_ACTIONS = [
+export const QUICK_ACTIONS: QuickAction[] = [
   { emoji: "🧴", label: "플라스틱 배출 방법 알려줘" },
   { emoji: "📍", label: "내 지역 규정 알려줘" },
   { emoji: "♻️", label: "재활용 마크 설명해줘" },
