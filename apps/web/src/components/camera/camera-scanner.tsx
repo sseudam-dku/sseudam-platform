@@ -1,5 +1,3 @@
-"use client";
-
 import { useRef, useState } from "react";
 import { Camera, X, Zap, ZapOff, Info, Image as ImageIcon, History } from "lucide-react";
 

@@ -1,7 +1,5 @@
-import ChatbotContainer from "@/components/containers/chatbot-container";
+import ChatbotClient from "@/components/chatbot/chatbot-client";
 
-const page = () => {
-  return <ChatbotContainer />;
-};
-
-export default page;
+export default function ChatbotPage() {
+  return <ChatbotClient />;
+}

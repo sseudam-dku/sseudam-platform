@@ -32,7 +32,28 @@ export function LoadingAnimation({ className }: LoadingAnimationProps) {
         animationData={tintedLoadingAnimation}
         loop
         autoplay
-        style={{ width: LOADING_WIDTH, height: LOADING_HEIGHT }}
+        width={LOADING_WIDTH}
+        height={LOADING_HEIGHT}
+      />
+    </div>
+  );
+}
+
+const CHAT_BUBBLE_LOADING_SCALE = 0.3;
+const CHAT_BUBBLE_LOADING_WIDTH = LOADING_WIDTH * CHAT_BUBBLE_LOADING_SCALE;
+const CHAT_BUBBLE_LOADING_HEIGHT = LOADING_HEIGHT * CHAT_BUBBLE_LOADING_SCALE;
+
+export function ChatBubbleLoadingAnimation({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn("flex items-center justify-center", className)}
+      style={{ width: CHAT_BUBBLE_LOADING_WIDTH, height: CHAT_BUBBLE_LOADING_HEIGHT }}>
+      <Lottie
+        animationData={tintedLoadingAnimation}
+        loop
+        autoplay
+        width={CHAT_BUBBLE_LOADING_WIDTH}
+        height={CHAT_BUBBLE_LOADING_HEIGHT}
       />
     </div>
   );

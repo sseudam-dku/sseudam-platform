@@ -45,6 +45,8 @@ export interface ChatInputProps {
   variant?: "default" | "chatbot";
 }
 
+const SPEECH_RECOGNITION_MAX_MS = 8000;
+
 export function ChatInput({
   onSend,
   disabled = false,
@@ -57,13 +59,25 @@ export function ChatInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
+  const listeningTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const preVoiceTextRef = useRef("");
+
+  function clearListeningTimeout() {
+    if (listeningTimeoutRef.current) {
+      clearTimeout(listeningTimeoutRef.current);
+      listeningTimeoutRef.current = null;
+    }
+  }
+
+  function stopListening() {
+    clearListeningTimeout();
+    recognitionRef.current?.stop();
+  }
 
   useEffect(() => {
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      clearListeningTimeout();
+      recognitionRef.current?.stop();
     };
   }, []);
 
@@ -81,9 +95,7 @@ export function ChatInput({
     }
 
     if (isListening) {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      stopListening();
     } else {
       try {
         const recognition = new SpeechRecognition();
@@ -95,13 +107,19 @@ export function ChatInput({
 
         recognition.onstart = () => {
           setIsListening(true);
+          clearListeningTimeout();
+          listeningTimeoutRef.current = setTimeout(() => {
+            stopListening();
+          }, SPEECH_RECOGNITION_MAX_MS);
         };
 
         recognition.onend = () => {
+          clearListeningTimeout();
           setIsListening(false);
         };
 
         recognition.onerror = () => {
+          clearListeningTimeout();
           setIsListening(false);
         };
 

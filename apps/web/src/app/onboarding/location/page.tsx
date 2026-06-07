@@ -8,20 +8,25 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import Map from "@/components/ui/map";
 import { SearchBar } from "@/components/ui/search-bar";
+import { updateUserLocation } from "@/lib/api/users";
+import { markOnboardingComplete } from "@/lib/onboarding";
 import { reverseGeocode } from "@/lib/location/reverse-geocode";
 import { useGeocode } from "@/lib/location/use-geocode";
 import { useGeolocation } from "@/lib/location/use-geolocation";
+import { useAuthStore } from "@/lib/store/use-auth-store";
 import { useLocationStore } from "@/lib/store/use-location-store";
 
 const Page = () => {
   const router = useRouter();
+  const { isLoggedIn } = useAuthStore();
+  const { setLocationFromDisplay } = useLocationStore();
   const [query, setQuery] = useState("");
   const { position, locating, locate } = useGeolocation();
   const [selected, setSelected] = useState(false);
   const { results, clear } = useGeocode(query, !selected);
   const [center, setCenter] = useState<{ lng: number; lat: number } | undefined>();
-  const [district, setDistrict] = useState("");
-  const { setLocation } = useLocationStore();
+  const [districtDisplay, setDistrictDisplay] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const mapCenter = center ?? position;
 
@@ -31,7 +36,7 @@ const Page = () => {
       .then(result => {
         if (result) {
           setQuery(result.name);
-          setDistrict(result.district);
+          setDistrictDisplay(result.district);
           setSelected(true);
         }
       })
@@ -39,6 +44,25 @@ const Page = () => {
         setCenter(position);
       });
   }, [position]);
+
+  async function handleComplete() {
+    if (!districtDisplay) return;
+    setIsSaving(true);
+    const parts = districtDisplay.trim().split(/\s+/);
+    const city = parts.length >= 2 ? parts[0] : "서울";
+    const district = parts.length >= 2 ? parts.slice(1).join(" ") : parts[0];
+    setLocationFromDisplay(`${city} ${district}`);
+    markOnboardingComplete();
+    if (isLoggedIn) {
+      try {
+        await updateUserLocation(city, district);
+      } catch {
+        // 로컬 저장은 완료됨 — API 동기화 실패는 무시
+      }
+    }
+    setIsSaving(false);
+    router.push("/onboarding/location/complete");
+  }
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -50,12 +74,12 @@ const Page = () => {
           onChange={e => {
             setQuery(e.target.value);
             setSelected(false);
-            setDistrict("");
+            setDistrictDisplay("");
           }}
           onClear={() => {
             setQuery("");
             setSelected(false);
-            setDistrict("");
+            setDistrictDisplay("");
             clear();
           }}
           placeholder="지역이나 동네로 검색"
@@ -70,7 +94,7 @@ const Page = () => {
                   onClick={() => {
                     setCenter({ lng: result.lng, lat: result.lat });
                     setQuery(result.fullAddress);
-                    setDistrict(result.district);
+                    setDistrictDisplay(result.district);
                     setSelected(true);
                     clear();
                   }}>
@@ -99,12 +123,9 @@ const Page = () => {
         <Button
           size="lg"
           className="w-full"
-          disabled={!district}
-          onClick={() => {
-            setLocation(district);
-            router.push("/onboarding/location/complete");
-          }}>
-          설정 완료
+          disabled={!districtDisplay || isSaving}
+          onClick={handleComplete}>
+          {isSaving ? "저장 중..." : "설정 완료"}
         </Button>
       </div>
     </div>

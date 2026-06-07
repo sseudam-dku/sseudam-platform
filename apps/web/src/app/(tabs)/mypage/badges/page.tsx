@@ -1,15 +1,25 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 import { Header } from "@/components/ui/header";
-import mockData from "@/data/mock";
+import { fetchUserBadges, type UserBadge } from "@/lib/api/users";
+import { useAuthStore } from "@/lib/store/use-auth-store";
 import { cn } from "@/lib/cn";
 
 const Page = () => {
   const router = useRouter();
+  const { isLoggedIn } = useAuthStore();
+  const [badges, setBadges] = useState<UserBadge[]>([]);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    fetchUserBadges()
+      .then(setBadges)
+      .catch(() => setBadges([]));
+  }, [isLoggedIn]);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-neutral-100">
@@ -17,7 +27,7 @@ const Page = () => {
 
       <div className="scrollbar-hide flex flex-1 flex-col overflow-y-auto p-4">
         <div className="my-auto flex flex-wrap justify-center gap-4">
-          {mockData.BADGES.map(badge => (
+          {badges.map(badge => (
             <div
               key={badge.id}
               className={cn(
