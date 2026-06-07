@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ChatBubble, type ChatBubbleProps } from "@/components/chat/chat-bubble";
 import { ChatInput } from "@/components/chat/chat-input";
@@ -26,10 +26,15 @@ const MOCK_REPLIES: Record<string, string> = {
 
 type Message = Omit<ChatBubbleProps, "className">;
 
-export function ChatbotTab() {
+export function ChatbotContainer() {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isExiting, setIsExiting] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   function handleBack() {
     if (isExiting) return;
@@ -39,9 +44,17 @@ export function ChatbotTab() {
   }
 
   function sendMessage(text: string) {
-    const userMsg: Message = { role: "user", content: text, status: "sent" };
+    const now = new Date();
+    const timeString = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+    const userMsg: Message = { role: "user", content: text, status: "sent", timestamp: timeString };
     const reply = MOCK_REPLIES[text] ?? MOCK_REPLIES.default;
-    const botMsg: Message = { role: "assistant", content: reply, senderName: "쓰담 AI" };
+    const botMsg: Message = {
+      role: "assistant",
+      content: reply,
+      senderName: "쓰담 AI",
+      timestamp: timeString,
+    };
     setMessages(prev => [...prev, userMsg, botMsg]);
   }
 
@@ -51,7 +64,7 @@ export function ChatbotTab() {
     <div
       className={cn(
         "flex flex-1 flex-col overflow-hidden bg-white",
-        isExiting && "animate-slide-out-right",
+        isExiting && "animate-page-exit",
       )}>
       <ChatbotHeader onBack={handleBack} />
 
@@ -76,7 +89,7 @@ export function ChatbotTab() {
                 <button
                   key={action.label}
                   onClick={() => sendMessage(action.label)}
-                  className="rounded-12 flex items-center gap-3 bg-neutral-50 px-4 py-3 text-left hover:bg-neutral-100 active:bg-neutral-100">
+                  className="rounded-12 flex cursor-pointer items-center gap-3 bg-neutral-50 px-4 py-3 text-left transition-colors duration-200 hover:bg-neutral-100 active:bg-neutral-100">
                   <span className="text-xl">{action.emoji}</span>
                   <span className="body-4 text-neutral-700">{action.label}</span>
                 </button>
@@ -90,6 +103,7 @@ export function ChatbotTab() {
             {messages.map((msg, i) => (
               <ChatBubble key={i} {...msg} />
             ))}
+            <div ref={messagesEndRef} />
           </div>
         </div>
       )}

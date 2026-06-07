@@ -1,5 +1,5 @@
-import { CategoryTab } from "@/components/tabs/category-tab";
+import { CategoryContainer } from "@/components/containers/category-container";
 
 export default function CategoryPage() {
-  return <CategoryTab />;
+  return <CategoryContainer />;
 }

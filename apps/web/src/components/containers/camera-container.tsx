@@ -44,7 +44,7 @@ function IconAlertCircle() {
   );
 }
 
-export function CameraTab() {
+export function CameraContainer() {
   const [state, setState] = useState<CameraState>("idle");
 
   function handleCapture() {

@@ -1,10 +1,36 @@
 "use client";
 
-import { MicOff } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { IconArrowUp } from "@/components/icons/arrow-up";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
+
+interface ISpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onend: (() => void) | null;
+  onerror: ((event: ISpeechRecognitionErrorEvent) => void) | null;
+  onresult: ((event: ISpeechRecognitionEvent) => void) | null;
+  start(): void;
+  stop(): void;
+}
+
+interface ISpeechRecognitionEvent {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface ISpeechRecognitionErrorEvent {
+  error: string;
+}
 
 export interface ChatInputProps {
   onSend: (message: string) => void;
@@ -23,6 +49,70 @@ export function ChatInput({
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<ISpeechRecognition | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleListening = () => {
+    if (typeof window === "undefined") return;
+    const SpeechRecognition =
+      (window as unknown as { SpeechRecognition?: new () => ISpeechRecognition })
+        .SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition?: new () => ISpeechRecognition })
+        .webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("이 브라우저에서는 음성 인식을 지원하지 않습니다.");
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    } else {
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "ko-KR";
+
+        recognition.onstart = () => {
+          setIsListening(true);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognition.onerror = () => {
+          setIsListening(false);
+        };
+
+        recognition.onresult = (event: ISpeechRecognitionEvent) => {
+          const transcript = event.results[0][0].transcript;
+          if (transcript) {
+            setValue(prev => {
+              const trimmed = prev.trim();
+              return trimmed ? `${trimmed} ${transcript}` : transcript;
+            });
+          }
+        };
+
+        recognitionRef.current = recognition;
+        recognition.start();
+      } catch {
+        setIsListening(false);
+      }
+    }
+  };
 
   function resizeTextarea() {
     const textarea = textareaRef.current;
@@ -45,6 +135,7 @@ export function ChatInput({
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.nativeEvent.isComposing) return;
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       handleSend();
@@ -63,14 +154,25 @@ export function ChatInput({
         <div className="flex items-center gap-3">
           <button
             type="button"
-            aria-label="음성 입력"
-            className="flex size-10 shrink-0 items-center justify-center text-green-500">
-            <MicOff className="size-6" strokeWidth={2} />
+            onClick={toggleListening}
+            aria-label={isListening ? "음성 입력 중지" : "음성 입력"}
+            className={cn(
+              "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors",
+              isListening
+                ? "animate-pulse bg-red-50 text-red-500"
+                : "text-green-500 hover:bg-neutral-100",
+            )}>
+            {isListening ? (
+              <Mic className="size-6 animate-bounce" strokeWidth={2} />
+            ) : (
+              <MicOff className="size-6" strokeWidth={2} />
+            )}
           </button>
           <input
             value={value}
             onChange={event => setValue(event.target.value)}
             onKeyDown={event => {
+              if (event.nativeEvent.isComposing) return;
               if (event.key === "Enter") {
                 event.preventDefault();
                 handleSend();
@@ -86,8 +188,8 @@ export function ChatInput({
             disabled={!canSend}
             onClick={handleSend}
             className={cn(
-              "flex size-11 shrink-0 items-center justify-center rounded-full bg-green-500 text-white",
-              !canSend && "opacity-50",
+              "flex size-11 shrink-0 items-center justify-center rounded-full bg-green-500 text-white transition-colors duration-200",
+              canSend ? "cursor-pointer hover:bg-green-600" : "cursor-not-allowed opacity-50",
             )}>
             <IconArrowUp className="size-5" />
           </button>

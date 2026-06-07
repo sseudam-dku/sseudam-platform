@@ -5,25 +5,28 @@ import { type ButtonHTMLAttributes, forwardRef } from "react";
 
 import { cn } from "@/lib/cn";
 
-const buttonVariants = cva("inline-flex cursor-pointer items-center justify-center gap-2", {
-  variants: {
-    variant: {
-      default: "bg-green-500 text-black hover:bg-green-600 active:bg-green-600",
-      secondary: "bg-white text-black hover:bg-neutral-50 active:bg-neutral-50",
-      outline:
-        "border border-neutral-300 bg-white text-black hover:bg-neutral-50 active:bg-neutral-50",
+const buttonVariants = cva(
+  "inline-flex cursor-pointer items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-40",
+  {
+    variants: {
+      variant: {
+        default: "bg-green-500 text-black hover:bg-green-600 active:bg-green-600",
+        secondary: "bg-white text-black hover:bg-neutral-50 active:bg-neutral-50",
+        outline:
+          "border border-neutral-300 bg-white text-black hover:bg-neutral-50 active:bg-neutral-50",
+      },
+      size: {
+        sm: "h-10 rounded-8 px-3 body-3",
+        md: "h-12 rounded-12 px-4 body-3",
+        lg: "h-14 rounded-16 px-6 body-3",
+      },
     },
-    size: {
-      sm: "h-10 rounded-8 px-3 body-3",
-      md: "h-12 rounded-12 px-4 body-3",
-      lg: "h-14 rounded-16 px-6 body-3",
+    defaultVariants: {
+      variant: "default",
+      size: "md",
     },
   },
-  defaultVariants: {
-    variant: "default",
-    size: "md",
-  },
-});
+);
 
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {

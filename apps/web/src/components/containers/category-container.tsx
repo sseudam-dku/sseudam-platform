@@ -72,7 +72,7 @@ function BackIcon() {
   );
 }
 
-export function CategoryTab() {
+export function CategoryContainer() {
   const [selected, setSelected] = useState<string | null>(null);
 
   const category = CATEGORIES.find(c => c.id === selected);
@@ -84,7 +84,7 @@ export function CategoryTab() {
         <div className="flex h-14 items-center gap-2 bg-white px-2 shadow-sm">
           <button
             onClick={() => setSelected(null)}
-            className="flex size-10 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-100">
+            className="flex size-10 cursor-pointer items-center justify-center rounded-full text-neutral-700 transition-colors hover:bg-neutral-100">
             <BackIcon />
           </button>
           <span className="head-5 text-neutral-900">{category.name}</span>
@@ -138,7 +138,7 @@ export function CategoryTab() {
                 key={cat.id}
                 onClick={() => setSelected(cat.id)}
                 className={cn(
-                  "rounded-12 flex flex-col items-center gap-2 py-5 transition-opacity hover:opacity-80 active:opacity-80",
+                  "rounded-12 flex cursor-pointer flex-col items-center gap-2 py-5 transition-all duration-200 hover:opacity-80 active:opacity-80",
                   cat.color.split(" ")[0],
                 )}>
                 <span className="text-3xl">{cat.emoji}</span>

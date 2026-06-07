@@ -1,5 +1,5 @@
-import { ChatbotTab } from "@/components/tabs/chatbot-tab";
+import { ChatbotContainer } from "@/components/containers/chatbot-container";
 
 export default function ChatbotPage() {
-  return <ChatbotTab />;
+  return <ChatbotContainer />;
 }
