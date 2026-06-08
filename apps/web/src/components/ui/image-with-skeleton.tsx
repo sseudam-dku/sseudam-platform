@@ -28,7 +28,7 @@ function ImageWithSkeleton({
 
   return (
     <span className={cn("relative inline-flex shrink-0", containerClassName)} style={size}>
-      {!isLoaded && <Skeleton className={cn("absolute inset-0", skeletonClassName)} style={size} />}
+      {!isLoaded && <Skeleton className={cn("absolute inset-0", skeletonClassName)} />}
       <Image
         alt={alt}
         width={width}
