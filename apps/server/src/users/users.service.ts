@@ -206,14 +206,16 @@ export class UsersService {
       if (!qualifies) {
         continue;
       }
-      await this.database.query(
+      const { rowCount } = await this.database.query(
         "INSERT INTO user_badges (user_id, badge_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
         [userId, badge.id],
       );
-      await this.database.query(
-        "INSERT INTO point_transactions (user_id, amount, description) VALUES ($1, $2, $3)",
-        [userId, badge.reward_points, `뱃지 획득: ${badge.id}`],
-      );
+      if (rowCount && rowCount > 0) {
+        await this.database.query(
+          "INSERT INTO point_transactions (user_id, amount, description) VALUES ($1, $2, $3)",
+          [userId, badge.reward_points, `뱃지 획득: ${badge.id}`],
+        );
+      }
     }
   }
 
