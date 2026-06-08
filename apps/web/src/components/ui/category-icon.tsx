@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { getCategoryImage } from "@/lib/waste-categories";
 import { cn } from "@/lib/cn";
 
@@ -12,12 +14,14 @@ const CategoryIcon = ({ categoryId, size = 32, className }: CategoryIconProps) =
     <span
       className={cn("inline-flex shrink-0 items-center justify-center", className)}
       style={{ width: size, height: size }}>
-      <img
+      <Image
         src={getCategoryImage(categoryId)}
         alt=""
-        decoding="async"
+        width={size}
+        height={size}
         draggable={false}
-        className="size-full object-contain"
+        className="object-contain"
+        unoptimized
       />
     </span>
   );

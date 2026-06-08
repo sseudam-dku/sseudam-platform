@@ -20,7 +20,6 @@ const GoogleAuthButton = ({
   const router = useRouter();
   const { loginWithGoogle, isLoading } = useAuthStore();
   const [error, setError] = useState<string | null>(null);
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   async function handleSuccess(response: CredentialResponse) {
     if (!response.credential) {

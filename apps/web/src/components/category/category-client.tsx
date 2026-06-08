@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { CategoryDetailView } from "@/components/category/category-detail-view";
 import { useWasteGuide } from "@/lib/query/hooks";
@@ -12,19 +12,14 @@ export function CategoryClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { city, district, isHydrated } = useLocationStore();
-  const [selected, setSelected] = useState<string | null>(searchParams.get("selected"));
+  const selected = searchParams.get("selected");
 
   useEffect(() => {
-    setSelected(searchParams.get("selected"));
-  }, [searchParams]);
-
-  useEffect(() => {
-    const param = searchParams.get("selected");
-    const isValid = param && WASTE_CATEGORIES.some(c => c.id === param);
+    const isValid = selected && WASTE_CATEGORIES.some(c => c.id === selected);
     if (!isValid) {
       router.replace("/");
     }
-  }, [searchParams, router]);
+  }, [selected, router]);
 
   const { data: guide, isLoading: isLoadingGuide } = useWasteGuide(
     selected,

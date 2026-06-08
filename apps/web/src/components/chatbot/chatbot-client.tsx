@@ -39,20 +39,14 @@ export function ChatbotClient() {
   const [isSending, setIsSending] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [remainingGuestMessages, setRemainingGuestMessages] = useState<number | null>(null);
-  const [isLoginRequired, setIsLoginRequired] = useState(false);
+  const [remainingGuestMessages, setRemainingGuestMessages] = useState<number | null>(() =>
+    isLoggedIn ? null : getRemainingGuestMessages(),
+  );
+  const [isLoginRequired, setIsLoginRequired] = useState(
+    () => !isLoggedIn && isGuestLimitReached(),
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const intervalsRef = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      setRemainingGuestMessages(null);
-      setIsLoginRequired(false);
-      return;
-    }
-    setRemainingGuestMessages(getRemainingGuestMessages());
-    setIsLoginRequired(isGuestLimitReached());
-  }, [isLoggedIn]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -179,8 +173,8 @@ export function ChatbotClient() {
       isExiting={isExiting}
       error={error}
       isLoggedIn={isLoggedIn}
-      remainingGuestMessages={remainingGuestMessages}
-      isLoginRequired={isLoginRequired}
+      remainingGuestMessages={isLoggedIn ? null : remainingGuestMessages}
+      isLoginRequired={isLoggedIn ? false : isLoginRequired}
       messagesEndRef={messagesEndRef}
       onBack={handleBack}
       onSendMessage={sendMessage}
