@@ -1,7 +1,10 @@
+"use client";
+
 import { AlertCircle, Clock } from "lucide-react";
 import Lottie from "lottie-react";
 
 import chatbotAnimation from "../../../public/lottie/Chatbot.json";
+import { ChatBubbleLoadingAnimation } from "@/components/ui/loading-animation";
 import { cn } from "@/lib/cn";
 
 export type ChatBubbleRole = "user" | "assistant";
@@ -72,15 +75,17 @@ export function ChatBubble({
           <span className="body-5 px-1 text-neutral-500">{senderName}</span>
         )}
 
-        <div
-          className={cn(
-            "rounded-16 body-2 px-4 py-3 whitespace-pre-wrap select-text",
-            isUser
-              ? "rounded-br-4 bg-green-500 text-neutral-50"
-              : "rounded-bl-4 border border-neutral-200 bg-white text-neutral-900",
-          )}>
-          {content}
-        </div>
+        {content.length > 0 && (
+          <div
+            className={cn(
+              "rounded-16 body-2 px-4 py-3 whitespace-pre-wrap select-text",
+              isUser
+                ? "rounded-br-4 bg-green-500 text-neutral-50"
+                : "rounded-bl-4 border border-neutral-200 bg-white text-neutral-900",
+            )}>
+            {content}
+          </div>
+        )}
 
         {(timestamp || status) && (
           <div className="body-5 flex items-center gap-1 px-1 text-neutral-400">
@@ -94,6 +99,22 @@ export function ChatBubble({
             ) : null}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+export function ChatbotLoadingBubble({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex w-full justify-start gap-2", className)}>
+      <div className="size-8 shrink-0">
+        <Lottie animationData={chatbotAnimation} loop autoplay className="size-8" />
+      </div>
+      <div className="flex max-w-[75%] flex-col items-start gap-1">
+        <span className="body-5 px-1 text-neutral-500">분리수거 도우미</span>
+        <div className="rounded-16 rounded-bl-4 border border-neutral-200 bg-white px-3 py-2">
+          <ChatBubbleLoadingAnimation />
+        </div>
       </div>
     </div>
   );

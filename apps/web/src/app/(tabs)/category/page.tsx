@@ -1,7 +1,11 @@
-import CategoryContainer from "@/components/containers/category-container";
+import { Suspense } from "react";
 
-const page = () => {
-  return <CategoryContainer />;
-};
+import CategoryClient from "@/components/category/category-client";
 
-export default page;
+export default function CategoryPage() {
+  return (
+    <Suspense>
+      <CategoryClient />
+    </Suspense>
+  );
+}

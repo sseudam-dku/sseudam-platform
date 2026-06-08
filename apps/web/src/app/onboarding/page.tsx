@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { GoogleLoginButton } from "@/components/ui/social-login-button";
+import GoogleAuthButton from "@/components/auth/google-auth-button";
 
 const DISTRICTS = ["마포구", "은평구", "강남구", "송파구", "용산구", "서대문구"];
 
@@ -45,7 +45,7 @@ const Page = () => {
       </div>
 
       <div className="flex flex-col gap-4">
-        <GoogleLoginButton size="lg" />
+        <GoogleAuthButton redirectTo="/onboarding/location" />
         <Link
           href="/onboarding/location"
           className="body-2 text-center text-neutral-600 underline underline-offset-2">

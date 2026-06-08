@@ -1,5 +1,3 @@
-"use client";
-
 import Lottie from "lottie-react";
 import globeAnimation from "../../../public/lottie/Globe.json";
 

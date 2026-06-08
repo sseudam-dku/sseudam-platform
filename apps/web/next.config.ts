@@ -8,6 +8,19 @@ const withPWA = withPWAInit({
   workboxOptions: {
     skipWaiting: true,
     clientsClaim: true,
+    runtimeCaching: [
+      {
+        urlPattern: /\/assets\/.*/i,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "static-assets",
+          expiration: {
+            maxEntries: 64,
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+          },
+        },
+      },
+    ],
   },
 });
 

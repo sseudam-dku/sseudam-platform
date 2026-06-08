@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
+import AppProviders from "@/components/providers/app-providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -45,7 +46,7 @@ export default function RootLayout({
       </head>
       <body className="h-dvh overflow-hidden">
         <main className="mx-auto flex h-dvh w-full max-w-107.5 flex-col overflow-hidden bg-neutral-50">
-          {children}
+          <AppProviders>{children}</AppProviders>
         </main>
       </body>
     </html>
