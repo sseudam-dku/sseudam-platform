@@ -3,9 +3,11 @@
 import { Camera, FileText, Home, MessageSquareText, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type ReactNode } from "react";
+import { type MouseEvent, type ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
+import { showLoginRequiredToast } from "@/lib/login-required-toast";
+import { useAuthStore } from "@/lib/store/use-auth-store";
 
 type NavItem = {
   href: string;
@@ -73,10 +75,24 @@ function isNavActive(pathname: string, href: string) {
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { isLoggedIn, isInitialized } = useAuthStore();
 
   const isActive = (href: string) => isNavActive(pathname, href);
 
   const isCameraActive = isActive("/camera");
+
+  function handleCameraClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (!isInitialized || !isLoggedIn) {
+      event.preventDefault();
+      showLoginRequiredToast();
+      return;
+    }
+
+    if (isCameraActive) {
+      event.preventDefault();
+      window.location.href = "/camera";
+    }
+  }
 
   return (
     <nav className="rounded-t-20 relative z-40 shrink-0 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px] shadow-neutral-900/10">
@@ -96,12 +112,7 @@ export function BottomNav() {
         href="/camera"
         prefetch={false}
         aria-label="카메라"
-        onClick={e => {
-          if (isCameraActive) {
-            e.preventDefault();
-            window.location.href = "/camera";
-          }
-        }}
+        onClick={handleCameraClick}
         className={cn(
           "absolute top-3 left-1/2 flex size-18 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-green-500 text-white shadow-md",
           isCameraActive && "ring-2 ring-green-500/40 ring-offset-2",

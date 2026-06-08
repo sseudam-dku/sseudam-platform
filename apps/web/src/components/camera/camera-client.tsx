@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import CameraAnalyzer from "@/components/camera/camera-analyzer";
 import CameraResult, { type TrashAnalysisResult } from "@/components/camera/camera-result";
@@ -9,7 +10,6 @@ import CameraScanner from "@/components/camera/camera-scanner";
 import { analyzeImage } from "@/lib/api/camera";
 import { createRecord } from "@/lib/api/records";
 import { useInvalidateUserData } from "@/lib/query/hooks";
-import { useAuthStore } from "@/lib/store/use-auth-store";
 import { useLocationStore } from "@/lib/store/use-location-store";
 
 type CameraState = "idle" | "analyzing" | "success" | "failure";
@@ -30,7 +30,6 @@ function dataUrlToBlob(dataUrl: string): Blob {
 
 export function CameraClient() {
   const router = useRouter();
-  const { isLoggedIn } = useAuthStore();
   const { mutate: invalidateUserData } = useInvalidateUserData();
   const { city, district, isHydrated } = useLocationStore();
   const resolvedCity = isHydrated ? city : "서울";
@@ -84,10 +83,6 @@ export function CameraClient() {
   }, [state]);
 
   async function runAnalysis(blob: Blob) {
-    if (!isLoggedIn) {
-      router.push("/mypage");
-      return;
-    }
     setState("analyzing");
     try {
       const result = await analyzeImage(blob);
@@ -105,6 +100,7 @@ export function CameraClient() {
         status: "success",
       });
       invalidateUserData();
+      toast.success("+10P 적립 완료! 🎉");
     } catch {
       setAnalysisResult(null);
       setState("failure");

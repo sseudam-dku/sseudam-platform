@@ -72,7 +72,7 @@ export function CategoryDetailView({
               {!isLocationHydrated ? (
                 <LocationTextSkeleton variant="detail" />
               ) : (
-                (guide?.displayLocation ?? (city && district ? `${city} ${district} 기준` : null))
+                (guide?.displayLocation ?? (city && district ? `${city} ${district}` : null))
               )}
             </p>
           </div>

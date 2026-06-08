@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import GoogleAuthButton from "@/components/auth/google-auth-button";
 import iconPoint from "@/assets/icon-point.svg";
+import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { useUserBadges, useUserStats } from "@/lib/query/hooks";
 import { useAuthStore } from "@/lib/store/use-auth-store";
@@ -46,12 +47,13 @@ const Page = () => {
         <div className="rounded-20 flex items-center gap-4 border border-neutral-100/50 bg-white p-5 shadow-sm">
           <div className="flex size-14 items-center justify-center overflow-hidden rounded-full bg-neutral-100">
             {user?.avatarUrl ? (
-              <Image
+              <ImageWithSkeleton
                 src={user.avatarUrl}
                 alt="프로필"
                 width={56}
                 height={56}
                 className="size-full object-cover"
+                skeletonClassName="rounded-full"
                 unoptimized
               />
             ) : (
@@ -90,7 +92,7 @@ const Page = () => {
 
           <div className="flex justify-center gap-3">
             {badges.slice(0, 6).map(badge => (
-              <Image
+              <ImageWithSkeleton
                 key={badge.id}
                 src={badge.image}
                 alt={badge.name}
@@ -98,6 +100,7 @@ const Page = () => {
                 width={44}
                 height={44}
                 className={cn("object-contain", !badge.earned && "opacity-35 grayscale")}
+                skeletonClassName="rounded-lg"
               />
             ))}
           </div>

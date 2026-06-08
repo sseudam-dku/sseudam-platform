@@ -2,8 +2,8 @@
 
 import { ArrowUp, Mic, MicOff } from "lucide-react";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import Toast from "@/components/ui/toast";
 import { cn } from "@/lib/cn";
 
 interface ISpeechRecognition {
@@ -55,7 +55,6 @@ export function ChatInput({
   variant = "default",
 }: ChatInputProps) {
   const [value, setValue] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
@@ -140,7 +139,7 @@ export function ChatInput({
           const combined = [base, finalText, interimText].filter(Boolean).join(" ");
 
           if (combined.length > 100) {
-            setToastMessage("최대 100자까지 입력할 수 있어요.");
+            toast.error("최대 100자까지 입력할 수 있어요.");
             setValue(combined.slice(0, 100));
           } else {
             setValue(combined);
@@ -160,7 +159,7 @@ export function ChatInput({
     if (!textarea) return;
 
     textarea.style.height = "auto";
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+    textarea.style.height = `${textarea.scrollHeight}px`;
   }
 
   useEffect(() => {
@@ -186,7 +185,7 @@ export function ChatInput({
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = event.target.value;
     if (val.length > 100) {
-      setToastMessage("최대 100자까지 입력할 수 있어요.");
+      toast.error("최대 100자까지 입력할 수 있어요.");
       setValue(val.slice(0, 100));
     } else {
       setValue(val);
@@ -200,27 +199,27 @@ export function ChatInput({
       return (
         <div
           className={cn(
-            "rounded-t-20 shrink-0 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_16px] shadow-neutral-900/10",
+            "rounded-t-20 shrink-0 bg-white px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_-4px_16px] shadow-neutral-900/10",
             className,
           )}>
-          <div className="flex items-end gap-3">
+          <div className="flex items-end gap-2">
             <button
               type="button"
               onClick={toggleListening}
               aria-label={isListening ? "음성 입력 중지" : "음성 입력"}
               className={cn(
-                "mb-0.5 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors",
+                "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors",
                 isListening
                   ? "animate-pulse bg-red-50 text-red-500"
                   : "text-green-500 hover:bg-neutral-100",
               )}>
               {isListening ? (
-                <Mic className="size-6 animate-bounce" strokeWidth={2} />
+                <Mic className="size-5 animate-bounce" strokeWidth={2} />
               ) : (
-                <MicOff className="size-6" strokeWidth={2} />
+                <MicOff className="size-5" strokeWidth={2} />
               )}
             </button>
-            <div className="rounded-20 flex flex-1 flex-col border border-transparent bg-neutral-100 px-4 py-2.5 focus-within:ring-2 focus-within:ring-green-500">
+            <div className="rounded-16 flex flex-1 flex-col border border-transparent bg-neutral-100 px-3 py-1.5 focus-within:ring-2 focus-within:ring-green-500">
               <textarea
                 ref={textareaRef}
                 value={value}
@@ -229,9 +228,9 @@ export function ChatInput({
                 placeholder={placeholder}
                 disabled={disabled}
                 rows={1}
-                className="body-2 scrollbar-hide max-h-30 min-h-11 w-full resize-none bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400 disabled:opacity-50"
+                className="body-4 scrollbar-hide w-full resize-none bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400 disabled:opacity-50"
               />
-              <span className="body-5 pointer-events-none mt-1 self-end text-neutral-400 select-none">
+              <span className="body-5 pointer-events-none mt-0.5 self-end text-neutral-400 select-none">
                 {value.length}/100
               </span>
             </div>
@@ -241,10 +240,10 @@ export function ChatInput({
               disabled={!canSend}
               onClick={handleSend}
               className={cn(
-                "flex size-11 shrink-0 items-center justify-center rounded-full bg-green-500 text-white transition-colors duration-200",
+                "flex size-9 shrink-0 items-center justify-center rounded-full bg-green-500 text-white transition-colors duration-200",
                 canSend ? "cursor-pointer hover:bg-green-600" : "cursor-not-allowed opacity-50",
               )}>
-              <ArrowUp className="size-5" />
+              <ArrowUp className="size-4" />
             </button>
           </div>
         </div>
@@ -267,7 +266,7 @@ export function ChatInput({
               placeholder={placeholder}
               disabled={disabled}
               rows={1}
-              className="body-2 max-h-30 min-h-12 w-full resize-none bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400 disabled:opacity-50"
+              className="body-2 scrollbar-hide w-full resize-none bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400 disabled:opacity-50"
             />
             <span className="body-5 pointer-events-none mt-1 self-end text-neutral-400 select-none">
               {value.length}/100
@@ -287,12 +286,5 @@ export function ChatInput({
     );
   };
 
-  return (
-    <>
-      {renderInput()}
-      {toastMessage && (
-        <Toast message={toastMessage} variant="error" onClose={() => setToastMessage("")} />
-      )}
-    </>
-  );
+  return renderInput();
 }

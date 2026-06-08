@@ -123,9 +123,10 @@ const Page = () => {
         <Button
           size="lg"
           className="w-full"
-          disabled={!districtDisplay || isSaving}
+          loading={isSaving}
+          disabled={!districtDisplay}
           onClick={handleComplete}>
-          {isSaving ? "저장 중..." : "설정 완료"}
+          {isSaving ? "저장중" : "설정 완료"}
         </Button>
       </div>
     </div>

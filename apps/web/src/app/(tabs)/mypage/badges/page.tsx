@@ -1,9 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-
 import { Header } from "@/components/ui/header";
+import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { useUserBadges } from "@/lib/query/hooks";
 import { useAuthStore } from "@/lib/store/use-auth-store";
 import { cn } from "@/lib/cn";
@@ -28,12 +27,13 @@ const Page = () => {
                   ? "border-green-100 text-neutral-900"
                   : "relative border-neutral-100 text-neutral-900",
               )}>
-              <Image
+              <ImageWithSkeleton
                 src={badge.image}
                 alt={badge.name}
                 width={80}
                 height={80}
                 className="object-contain"
+                skeletonClassName="rounded-xl"
               />
               <div className="flex flex-col gap-1 text-center">
                 <p className="body-4 leading-tight">{badge.name}</p>

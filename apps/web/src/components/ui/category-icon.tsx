@@ -1,5 +1,4 @@
-import Image from "next/image";
-
+import { ImageWithSkeleton } from "@/components/ui/image-with-skeleton";
 import { getCategoryImage } from "@/lib/waste-categories";
 import { cn } from "@/lib/cn";
 
@@ -14,13 +13,14 @@ const CategoryIcon = ({ categoryId, size = 32, className }: CategoryIconProps) =
     <span
       className={cn("inline-flex shrink-0 items-center justify-center", className)}
       style={{ width: size, height: size }}>
-      <Image
+      <ImageWithSkeleton
         src={getCategoryImage(categoryId)}
         alt=""
         width={size}
         height={size}
         draggable={false}
         className="object-contain"
+        skeletonClassName="rounded-lg"
         unoptimized
       />
     </span>

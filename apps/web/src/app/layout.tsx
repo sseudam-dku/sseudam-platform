@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 import AppProviders from "@/components/providers/app-providers";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -48,6 +49,7 @@ export default function RootLayout({
         <main className="mx-auto flex h-dvh w-full max-w-107.5 flex-col overflow-hidden bg-neutral-50">
           <AppProviders>{children}</AppProviders>
         </main>
+        <Toaster />
       </body>
     </html>
   );
