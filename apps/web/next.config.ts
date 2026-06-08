@@ -24,21 +24,8 @@ const withPWA = withPWAInit({
   },
 });
 
-const API_PROXY_TARGET = process.env.API_PROXY_TARGET;
-
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  async rewrites() {
-    if (!API_PROXY_TARGET) {
-      return [];
-    }
-    return [
-      {
-        source: "/backend/:path*",
-        destination: `${API_PROXY_TARGET}/:path*`,
-      },
-    ];
-  },
 };
 
 export default withPWA(nextConfig);
