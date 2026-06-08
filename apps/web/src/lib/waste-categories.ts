@@ -8,12 +8,12 @@ export interface WasteCategory {
 
 export const CATEGORY_IMAGES: Record<string, string> = {
   plastic: "/assets/category/icon-plastic.png",
-  paper: "/assets/category/icon-paper.svg",
-  glass: "/assets/category/icon-glass.svg",
+  paper: "/assets/category/icon-paper.png",
+  glass: "/assets/category/icon-glass.png",
   can: "/assets/category/icon-can.png",
   food: "/assets/category/icon-food.png",
   styrofoam: "/assets/category/icon-styrofoam.png",
-  clothes: "/assets/category/icon-clothes.svg",
+  clothes: "/assets/category/icon-clothes.png",
   lamp: "/assets/category/icon-bulb.svg",
   battery: "/assets/category/icon-battery.png",
 };

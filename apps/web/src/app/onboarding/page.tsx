@@ -21,7 +21,7 @@ const Page = () => {
   return (
     <main className="flex min-h-dvh flex-col px-6 pt-[env(safe-area-inset-top)] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
       <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-        <Image src="/logo-nobg.svg" alt="쓰담 로고" width={200} height={200} priority />
+        <Image src="/logo-nobg.png" alt="쓰담 로고" width={200} height={200} priority />
         <div className="flex flex-col">
           <h1 className="head-1 text-neutral-900">쓰담에서</h1>
           <p className="head-1 flex items-center justify-center text-neutral-900">

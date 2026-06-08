@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   applicationName: "쓰담",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/logo-nobg.svg",
+    icon: "/logo-nobg.png",
     apple: "/logo-pwa.png",
   },
   appleWebApp: {
