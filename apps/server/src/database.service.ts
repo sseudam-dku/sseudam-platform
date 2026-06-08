@@ -9,6 +9,7 @@ export class DatabaseService implements OnModuleDestroy {
   constructor(configService: ConfigService) {
     this.pool = new Pool({
       connectionString: configService.getOrThrow<string>("DATABASE_URL"),
+      ssl: { rejectUnauthorized: false },
     });
   }
 

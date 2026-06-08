@@ -1,0 +1,9 @@
+node_modules
+**/node_modules
+**/dist
+**/.next
+apps/web
+!apps/server/rds-ca.pem
+.git
+.husky
+deploy
