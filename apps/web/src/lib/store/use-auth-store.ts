@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 import * as authApi from "@/lib/api/auth";
-import { clearLegacyAccessToken } from "@/lib/api/client";
+import { clearLegacyAccessToken, clearTokens, setTokens } from "@/lib/api/client";
 import type { AuthUser } from "@/lib/api/auth";
 
 interface AuthState {
@@ -61,6 +61,7 @@ export function useAuthStore() {
     setState({ isLoading: true });
     try {
       const result = await authApi.loginWithGoogle(idToken);
+      setTokens(result.accessToken, result.refreshToken);
       setState({ user: result.user, isLoading: false, isInitialized: true });
       return result.user;
     } catch (error) {
@@ -74,6 +75,7 @@ export function useAuthStore() {
     try {
       await authApi.logout();
     } finally {
+      clearTokens();
       setState({ user: null, isLoading: false, isInitialized: true });
     }
   };
