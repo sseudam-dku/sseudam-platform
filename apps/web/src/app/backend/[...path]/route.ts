@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 const HOP_BY_HOP_HEADERS = new Set([
   "connection",
@@ -27,13 +28,12 @@ async function proxyRequest(request: NextRequest, pathSegments: string[]): Promi
       headers.set(key, value);
     }
   }
-  const init: RequestInit & { duplex?: "half" } = {
+  const init: RequestInit = {
     method: request.method,
     headers,
   };
   if (request.method !== "GET" && request.method !== "HEAD") {
-    init.body = request.body;
-    init.duplex = "half";
+    init.body = await request.arrayBuffer();
   }
   const response = await fetch(url, init);
   const responseHeaders = new Headers();
