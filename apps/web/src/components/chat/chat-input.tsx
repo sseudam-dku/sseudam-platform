@@ -228,7 +228,7 @@ export function ChatInput({
                 placeholder={placeholder}
                 disabled={disabled}
                 rows={1}
-                className="body-4 scrollbar-hide w-full resize-none bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400 disabled:opacity-50"
+                className="body-2 scrollbar-hide w-full resize-none bg-transparent text-neutral-900 outline-none placeholder:text-neutral-400 disabled:opacity-50"
               />
               <span className="body-5 pointer-events-none mt-0.5 self-end text-neutral-400 select-none">
                 {value.length}/100
