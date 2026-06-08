@@ -1,77 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import GoogleAuthButton from "@/components/auth/google-auth-button";
 import { DisposalGuideSection } from "@/components/camera/disposal-guide-section";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { LoadingAnimation } from "@/components/ui/loading-animation";
 import { LoadingScreen } from "@/components/ui/loading-screen";
-import { fetchRecords, type DisposalRecord } from "@/lib/api/records";
-import { fetchUserStats, type UserStats } from "@/lib/api/users";
-import { fetchCategoryDetail, type WasteCategoryDetail } from "@/lib/api/waste-sorting";
+import type { DisposalRecord } from "@/lib/api/records";
 import { buildDisposalGuideSteps } from "@/lib/disposal-guide";
+import { useRecords, useUserStats, useWasteGuide } from "@/lib/query/hooks";
 import { useAuthStore } from "@/lib/store/use-auth-store";
 import { useLocationStore } from "@/lib/store/use-location-store";
+
+function RecordGuideSection({
+  categoryId,
+  city,
+  district,
+}: {
+  categoryId: string;
+  city: string;
+  district: string;
+}) {
+  const { data: guide, isLoading } = useWasteGuide(categoryId, city, district);
+  return (
+    <DisposalGuideSection steps={buildDisposalGuideSteps(guide ?? null)} isLoading={isLoading} />
+  );
+}
 
 const Page = () => {
   const { isLoggedIn, isInitialized } = useAuthStore();
   const { city, district, isHydrated } = useLocationStore();
-  const [records, setRecords] = useState<DisposalRecord[]>([]);
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: records = [], isLoading } = useRecords(isLoggedIn);
+  const { data: stats } = useUserStats(isLoggedIn);
   const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
-  const [guidesByCategoryId, setGuidesByCategoryId] = useState<
-    Record<string, WasteCategoryDetail | null>
-  >({});
-  const [loadingGuideId, setLoadingGuideId] = useState<string | null>(null);
+  const resolvedCity = isHydrated ? city : "서울";
+  const resolvedDistrict = isHydrated ? district : "중구";
 
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    let cancelled = false;
-    void Promise.all([fetchRecords(), fetchUserStats()])
-      .then(([recordsData, statsData]) => {
-        if (!cancelled) {
-          setRecords(recordsData);
-          setStats(statsData);
-          setIsLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setRecords([]);
-          setStats(null);
-          setIsLoading(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoggedIn]);
-
-  async function handleToggleGuide(record: DisposalRecord) {
-    if (expandedRecordId === record.id) {
-      setExpandedRecordId(null);
-      return;
-    }
-    setExpandedRecordId(record.id);
-    if (guidesByCategoryId[record.categoryId] !== undefined) {
-      return;
-    }
-    setLoadingGuideId(record.id);
-    try {
-      const guide = await fetchCategoryDetail(
-        record.categoryId,
-        isHydrated ? city : "서울",
-        isHydrated ? district : "중구",
-      );
-      setGuidesByCategoryId(prev => ({ ...prev, [record.categoryId]: guide }));
-    } catch {
-      setGuidesByCategoryId(prev => ({ ...prev, [record.categoryId]: null }));
-    } finally {
-      setLoadingGuideId(null);
-    }
+  function handleToggleGuide(record: DisposalRecord) {
+    setExpandedRecordId(expandedRecordId === record.id ? null : record.id);
   }
 
   if (!isInitialized) {
@@ -114,15 +82,13 @@ const Page = () => {
             <div className="flex flex-col gap-2">
               {records.map(rec => {
                 const isExpanded = expandedRecordId === rec.id;
-                const guide = guidesByCategoryId[rec.categoryId] ?? null;
-                const guideSteps = buildDisposalGuideSteps(guide);
                 return (
                   <div
                     key={rec.id}
                     className="rounded-16 border border-neutral-100 bg-white shadow-sm">
                     <button
                       type="button"
-                      onClick={() => void handleToggleGuide(rec)}
+                      onClick={() => handleToggleGuide(rec)}
                       className="flex w-full cursor-pointer items-center justify-between p-4 text-left">
                       <div className="flex items-center gap-3">
                         <div className="flex size-11 items-center justify-center rounded-full bg-green-50">
@@ -147,9 +113,10 @@ const Page = () => {
                     </button>
                     {isExpanded ? (
                       <div className="border-t border-neutral-100 px-4 pt-2 pb-4">
-                        <DisposalGuideSection
-                          steps={guideSteps}
-                          isLoading={loadingGuideId === rec.id}
+                        <RecordGuideSection
+                          categoryId={rec.categoryId}
+                          city={resolvedCity}
+                          district={resolvedDistrict}
                         />
                       </div>
                     ) : null}

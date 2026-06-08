@@ -2,24 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 
 import { Header } from "@/components/ui/header";
-import { fetchUserBadges, type UserBadge } from "@/lib/api/users";
+import { useUserBadges } from "@/lib/query/hooks";
 import { useAuthStore } from "@/lib/store/use-auth-store";
 import { cn } from "@/lib/cn";
 
 const Page = () => {
   const router = useRouter();
   const { isLoggedIn } = useAuthStore();
-  const [badges, setBadges] = useState<UserBadge[]>([]);
-
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    fetchUserBadges()
-      .then(setBadges)
-      .catch(() => setBadges([]));
-  }, [isLoggedIn]);
+  const { data: badges = [] } = useUserBadges(isLoggedIn);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-neutral-100">

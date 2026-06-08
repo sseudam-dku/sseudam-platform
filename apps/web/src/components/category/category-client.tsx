@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { CategoryDetailView } from "@/components/category/category-detail-view";
-import { fetchCategoryDetail, type WasteCategoryDetail } from "@/lib/api/waste-sorting";
+import { useWasteGuide } from "@/lib/query/hooks";
 import { useLocationStore } from "@/lib/store/use-location-store";
 import { WASTE_CATEGORIES } from "@/lib/waste-categories";
 
@@ -13,10 +13,6 @@ export function CategoryClient() {
   const searchParams = useSearchParams();
   const { city, district, isHydrated } = useLocationStore();
   const [selected, setSelected] = useState<string | null>(searchParams.get("selected"));
-  const [guideState, setGuideState] = useState<{
-    categoryId: string;
-    guide: WasteCategoryDetail | null;
-  }>({ categoryId: "", guide: null });
 
   useEffect(() => {
     setSelected(searchParams.get("selected"));
@@ -30,28 +26,14 @@ export function CategoryClient() {
     }
   }, [searchParams, router]);
 
-  useEffect(() => {
-    if (!selected || !isHydrated) return;
-    let cancelled = false;
-    void fetchCategoryDetail(selected, city, district)
-      .then(data => {
-        if (!cancelled) {
-          setGuideState({ categoryId: selected, guide: data });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setGuideState({ categoryId: selected, guide: null });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [selected, city, district, isHydrated]);
+  const { data: guide, isLoading: isLoadingGuide } = useWasteGuide(
+    selected,
+    city,
+    district,
+    isHydrated,
+  );
 
   const category = WASTE_CATEGORIES.find(c => c.id === selected);
-  const guide = guideState.categoryId === selected ? guideState.guide : null;
-  const isLoadingGuide = selected !== null && guideState.categoryId !== selected;
 
   if (!selected || !category) {
     return null;
@@ -62,7 +44,7 @@ export function CategoryClient() {
       category={category}
       city={city}
       district={district}
-      guide={guide}
+      guide={guide ?? null}
       isLoadingGuide={isLoadingGuide}
       isLocationHydrated={isHydrated}
       onBack={() => router.push("/")}

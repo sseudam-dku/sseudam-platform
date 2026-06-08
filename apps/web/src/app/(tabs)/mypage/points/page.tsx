@@ -2,34 +2,18 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import iconPoint from "@/assets/icon-point.svg";
 import { Header } from "@/components/ui/header";
-import {
-  fetchPointHistory,
-  fetchUserStats,
-  type PointHistoryItem,
-  type UserStats,
-} from "@/lib/api/users";
+import { usePointHistory, useUserStats } from "@/lib/query/hooks";
 import { useAuthStore } from "@/lib/store/use-auth-store";
 import { cn } from "@/lib/cn";
 
 const Page = () => {
   const router = useRouter();
   const { isLoggedIn } = useAuthStore();
-  const [history, setHistory] = useState<PointHistoryItem[]>([]);
-  const [stats, setStats] = useState<UserStats | null>(null);
-
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    fetchPointHistory()
-      .then(setHistory)
-      .catch(() => setHistory([]));
-    fetchUserStats()
-      .then(setStats)
-      .catch(() => setStats(null));
-  }, [isLoggedIn]);
+  const { data: history = [] } = usePointHistory(isLoggedIn);
+  const { data: stats } = useUserStats(isLoggedIn);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-neutral-100">

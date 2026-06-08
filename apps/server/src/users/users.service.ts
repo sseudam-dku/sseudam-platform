@@ -1,11 +1,19 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { QueryResultRow } from "pg";
+import { InMemoryCacheService } from "../core/cache/in-memory-cache.service";
 import { DatabaseService } from "../database.service";
 import { UpdateLocationDto } from "./dto/update-location.dto";
 
 interface LocationRow extends QueryResultRow {
   city: string | null;
   district: string | null;
+}
+
+interface BadgeDefinitionRow extends QueryResultRow {
+  id: string;
+  condition_type: string;
+  condition_value: number;
+  reward_points: number;
 }
 
 export interface UserLocation {
@@ -55,12 +63,18 @@ const CATEGORY_COLORS: Record<string, string> = {
   battery: "bg-red-400",
 };
 
+const USER_STATS_CACHE_TTL_MS = 3 * 60 * 1000;
+const USER_POINTS_CACHE_TTL_MS = 60 * 1000;
+
 /**
  * Manages user profile, location, stats, badges, and points.
  */
 @Injectable()
 export class UsersService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly cache: InMemoryCacheService,
+  ) {}
 
   async updateLocation(
     userId: string,
@@ -76,6 +90,7 @@ export class UsersService {
     if (!rows[0]?.city || !rows[0]?.district) {
       throw new NotFoundException("User not found");
     }
+    this.cache.invalidateUser(userId);
     return this.mapLocation(rows[0].city, rows[0].district);
   }
 
@@ -93,18 +108,14 @@ export class UsersService {
   }
 
   async getStats(userId: string): Promise<UserStats> {
-    const totalRecords = await this.countRecords(userId);
-    const totalPoints = await this.sumPoints(userId);
-    const monthlyRecords = await this.countMonthlyRecords(userId);
-    const streakDays = await this.calculateStreakDays(userId);
-    const categoryBreakdown = await this.getCategoryBreakdown(userId);
-    return {
-      totalRecords,
-      totalPoints,
-      monthlyRecords,
-      streakDays,
-      categoryBreakdown,
-    };
+    const cacheKey = `user-stats:${userId}`;
+    const cached = this.cache.get<UserStats>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+    const stats = await this.loadStats(userId);
+    this.cache.set(cacheKey, stats, USER_STATS_CACHE_TTL_MS, userId);
+    return stats;
   }
 
   async getBadges(userId: string): Promise<UserBadge[]> {
@@ -136,6 +147,11 @@ export class UsersService {
   }
 
   async getPointHistory(userId: string): Promise<PointHistoryItem[]> {
+    const cacheKey = `user-points:${userId}`;
+    const cached = this.cache.get<PointHistoryItem[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
     const { rows } = await this.database.query<{
       id: string;
       description: string;
@@ -149,31 +165,43 @@ export class UsersService {
        LIMIT 50`,
       [userId],
     );
-    return rows.map(row => ({
+    const history = rows.map(row => ({
       id: row.id,
       date: this.formatDate(row.created_at),
       category: row.description,
       points: row.amount,
     }));
+    this.cache.set(cacheKey, history, USER_POINTS_CACHE_TTL_MS, userId);
+    return history;
+  }
+
+  invalidateUserDataCaches(userId: string): void {
+    this.cache.invalidateUserScope(userId, "user-stats:");
+    this.cache.invalidateUserScope(userId, "user-records:");
+    this.cache.invalidateUserScope(userId, "user-points:");
   }
 
   async evaluateBadges(userId: string): Promise<void> {
-    const badges = await this.database.query<{
-      id: string;
-      condition_type: string;
-      condition_value: number;
-      reward_points: number;
-    }>("SELECT id, condition_type, condition_value, reward_points FROM badges");
-    for (const badge of badges.rows) {
-      const earned = await this.hasBadge(userId, badge.id);
-      if (earned) {
+    const { rows: badges } = await this.database.query<BadgeDefinitionRow>(
+      "SELECT id, condition_type, condition_value, reward_points FROM badges",
+    );
+    const { rows: earnedRows } = await this.database.query<{ badge_id: string }>(
+      "SELECT badge_id FROM user_badges WHERE user_id = $1",
+      [userId],
+    );
+    const earnedSet = new Set(earnedRows.map(row => row.badge_id));
+    const streakDays = await this.calculateStreakDays(userId);
+    const categoryCounts = await this.loadCategoryCounts(userId);
+    const distinctCategoryCount = categoryCounts.size;
+    for (const badge of badges) {
+      if (earnedSet.has(badge.id)) {
         continue;
       }
-      const qualifies = await this.checkBadgeCondition(
-        userId,
-        badge.condition_type,
-        badge.condition_value,
-        badge.id,
+      const qualifies = this.checkBadgeConditionInMemory(
+        badge,
+        streakDays,
+        distinctCategoryCount,
+        categoryCounts,
       );
       if (!qualifies) {
         continue;
@@ -189,6 +217,32 @@ export class UsersService {
     }
   }
 
+  private async loadStats(userId: string): Promise<UserStats> {
+    const { rows } = await this.database.query<{
+      total_records: string;
+      monthly_records: string;
+      total_points: string | null;
+    }>(
+      `SELECT
+         (SELECT COUNT(*)::text FROM disposal_records WHERE user_id = $1 AND status = 'success') AS total_records,
+         (SELECT COUNT(*)::text FROM disposal_records
+          WHERE user_id = $1 AND status = 'success' AND created_at >= date_trunc('month', NOW())) AS monthly_records,
+         (SELECT SUM(amount)::text FROM point_transactions WHERE user_id = $1) AS total_points`,
+      [userId],
+    );
+    const [streakDays, categoryBreakdown] = await Promise.all([
+      this.calculateStreakDays(userId),
+      this.getCategoryBreakdown(userId),
+    ]);
+    return {
+      totalRecords: Number(rows[0]?.total_records ?? 0),
+      totalPoints: Number(rows[0]?.total_points ?? 0),
+      monthlyRecords: Number(rows[0]?.monthly_records ?? 0),
+      streakDays,
+      categoryBreakdown,
+    };
+  }
+
   private mapLocation(city: string, district: string): UserLocation {
     return {
       city,
@@ -197,32 +251,37 @@ export class UsersService {
     };
   }
 
-  private async countRecords(userId: string): Promise<number> {
-    const { rows } = await this.database.query<{ count: string }>(
-      "SELECT COUNT(*)::text AS count FROM disposal_records WHERE user_id = $1 AND status = 'success'",
-      [userId],
-    );
-    return Number(rows[0]?.count ?? 0);
-  }
-
-  private async sumPoints(userId: string): Promise<number> {
-    const { rows } = await this.database.query<{ total: string | null }>(
-      "SELECT SUM(amount)::text AS total FROM point_transactions WHERE user_id = $1",
-      [userId],
-    );
-    return Number(rows[0]?.total ?? 0);
-  }
-
-  private async countMonthlyRecords(userId: string): Promise<number> {
-    const { rows } = await this.database.query<{ count: string }>(
-      `SELECT COUNT(*)::text AS count
+  private async loadCategoryCounts(userId: string): Promise<Map<string, number>> {
+    const { rows } = await this.database.query<{ category_id: string; count: string }>(
+      `SELECT category_id, COUNT(*)::text AS count
        FROM disposal_records
-       WHERE user_id = $1
-         AND status = 'success'
-         AND created_at >= date_trunc('month', NOW())`,
+       WHERE user_id = $1 AND status = 'success'
+       GROUP BY category_id`,
       [userId],
     );
-    return Number(rows[0]?.count ?? 0);
+    return new Map(rows.map(row => [row.category_id, Number(row.count)]));
+  }
+
+  private checkBadgeConditionInMemory(
+    badge: BadgeDefinitionRow,
+    streakDays: number,
+    distinctCategoryCount: number,
+    categoryCounts: Map<string, number>,
+  ): boolean {
+    if (badge.condition_type === "streak_days") {
+      return streakDays >= badge.condition_value;
+    }
+    if (badge.condition_type === "all_categories") {
+      return distinctCategoryCount >= badge.condition_value;
+    }
+    if (badge.condition_type === "category_count") {
+      const categoryId = this.resolveBadgeCategory(badge.id);
+      if (!categoryId) {
+        return false;
+      }
+      return (categoryCounts.get(categoryId) ?? 0) >= badge.condition_value;
+    }
+    return false;
   }
 
   private async calculateStreakDays(userId: string): Promise<number> {
@@ -275,49 +334,6 @@ export class UsersService {
       percent: Math.round((Number(row.count) / total) * 100),
       color: CATEGORY_COLORS[row.category_id] ?? "bg-neutral-400",
     }));
-  }
-
-  private async hasBadge(userId: string, badgeId: string): Promise<boolean> {
-    const { rows } = await this.database.query<{ exists: boolean }>(
-      "SELECT EXISTS(SELECT 1 FROM user_badges WHERE user_id = $1 AND badge_id = $2) AS exists",
-      [userId, badgeId],
-    );
-    return rows[0]?.exists ?? false;
-  }
-
-  private async checkBadgeCondition(
-    userId: string,
-    conditionType: string,
-    conditionValue: number,
-    badgeId: string,
-  ): Promise<boolean> {
-    if (conditionType === "streak_days") {
-      const streak = await this.calculateStreakDays(userId);
-      return streak >= conditionValue;
-    }
-    if (conditionType === "all_categories") {
-      const { rows } = await this.database.query<{ count: string }>(
-        `SELECT COUNT(DISTINCT category_id)::text AS count
-         FROM disposal_records
-         WHERE user_id = $1 AND status = 'success'`,
-        [userId],
-      );
-      return Number(rows[0]?.count ?? 0) >= conditionValue;
-    }
-    if (conditionType === "category_count") {
-      const categoryId = this.resolveBadgeCategory(badgeId);
-      if (!categoryId) {
-        return false;
-      }
-      const { rows } = await this.database.query<{ count: string }>(
-        `SELECT COUNT(*)::text AS count
-         FROM disposal_records
-         WHERE user_id = $1 AND category_id = $2 AND status = 'success'`,
-        [userId, categoryId],
-      );
-      return Number(rows[0]?.count ?? 0) >= conditionValue;
-    }
-    return false;
   }
 
   private resolveBadgeCategory(badgeId: string): string | null {

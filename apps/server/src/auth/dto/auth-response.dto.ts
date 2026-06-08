@@ -34,3 +34,10 @@ export class LogoutResponseDto {
   @ApiProperty({ description: "로그아웃 성공 여부", example: true })
   success!: boolean;
 }
+
+export class RefreshTokenResponseDto {
+  @ApiProperty({
+    description: "새 JWT 액세스 토큰. Authorization: Bearer {token} 또는 access_token 쿠키로 전달",
+  })
+  accessToken!: string;
+}

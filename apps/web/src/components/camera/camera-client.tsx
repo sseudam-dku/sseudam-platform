@@ -7,8 +7,8 @@ import CameraAnalyzer from "@/components/camera/camera-analyzer";
 import CameraResult, { type TrashAnalysisResult } from "@/components/camera/camera-result";
 import CameraScanner from "@/components/camera/camera-scanner";
 import { analyzeImage } from "@/lib/api/camera";
-import { getAccessToken } from "@/lib/api/client";
 import { createRecord } from "@/lib/api/records";
+import { useInvalidateUserData } from "@/lib/query/hooks";
 import { useAuthStore } from "@/lib/store/use-auth-store";
 import { useLocationStore } from "@/lib/store/use-location-store";
 
@@ -31,6 +31,7 @@ function dataUrlToBlob(dataUrl: string): Blob {
 export function CameraClient() {
   const router = useRouter();
   const { isLoggedIn } = useAuthStore();
+  const { mutate: invalidateUserData } = useInvalidateUserData();
   const { city, district, isHydrated } = useLocationStore();
   const resolvedCity = isHydrated ? city : "서울";
   const resolvedDistrict = isHydrated ? district : DEFAULT_DISTRICT;
@@ -83,7 +84,7 @@ export function CameraClient() {
   }, [state]);
 
   async function runAnalysis(blob: Blob) {
-    if (!isLoggedIn || !getAccessToken()) {
+    if (!isLoggedIn) {
       router.push("/mypage");
       return;
     }
@@ -103,6 +104,7 @@ export function CameraClient() {
         itemName: primaryItem.name,
         status: "success",
       });
+      invalidateUserData();
     } catch {
       setAnalysisResult(null);
       setState("failure");

@@ -15,7 +15,7 @@ import { JwtStrategy } from "./jwt.strategy";
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const expiresInSeconds = 60 * 60 * 24 * 7;
+        const expiresInSeconds = configService.get<number>("JWT_ACCESS_EXPIRES_IN", 900);
         return {
           secret: configService.getOrThrow<string>("JWT_SECRET"),
           signOptions: {

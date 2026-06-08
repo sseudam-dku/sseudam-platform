@@ -5,6 +5,7 @@ import { createHash, randomUUID } from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import { QueryResultRow } from "pg";
 import { AuthenticatedUser } from "../core/models/authenticated-user.interface";
+import { InMemoryCacheService } from "../core/cache/in-memory-cache.service";
 import { DatabaseService } from "../database.service";
 import { JwtPayload } from "./models/jwt-payload.interface";
 
@@ -27,7 +28,12 @@ interface GoogleTokenPayload {
 
 export interface AuthLoginResult {
   accessToken: string;
+  refreshToken: string;
   user: AuthenticatedUser;
+}
+
+export interface RefreshAccessTokenResult {
+  accessToken: string;
 }
 
 /**
@@ -37,30 +43,50 @@ export interface AuthLoginResult {
 export class AuthService {
   private readonly googleClient: OAuth2Client;
   private readonly googleClientId: string;
-  private readonly jwtExpiresInSeconds = 60 * 60 * 24 * 7;
+  private readonly jwtAccessExpiresInSeconds: number;
+  private readonly sessionExpiresInDays = 7;
+  private readonly sessionCacheTtlMs = 3 * 60 * 1000;
 
   constructor(
     private readonly database: DatabaseService,
     private readonly jwtService: JwtService,
+    private readonly cache: InMemoryCacheService,
     configService: ConfigService,
   ) {
     this.googleClientId = configService.getOrThrow<string>("GOOGLE_CLIENT_ID");
     this.googleClient = new OAuth2Client(this.googleClientId);
+    this.jwtAccessExpiresInSeconds = configService.get<number>("JWT_ACCESS_EXPIRES_IN", 900);
   }
 
   async loginWithGoogle(idToken: string): Promise<AuthLoginResult> {
     const payload = await this.verifyGoogleToken(idToken);
     const user = await this.findOrCreateUser(payload);
-    const sessionId = await this.createSession(user.id);
-    const accessToken = await this.jwtService.signAsync(
-      {
-        sub: user.id,
-        email: user.email,
-        sessionId,
-      } satisfies JwtPayload,
-      { expiresIn: this.jwtExpiresInSeconds },
-    );
-    return { accessToken, user: this.mapUser(user) };
+    const { sessionId, refreshToken } = await this.createSession(user.id);
+    const accessToken = await this.signAccessToken(user.id, user.email, sessionId);
+    return { accessToken, refreshToken, user: this.mapUser(user) };
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<RefreshAccessTokenResult> {
+    const tokenHash = createHash("sha256").update(refreshToken).digest("hex");
+    const { rows } = await this.database.query<{
+      id: string;
+      user_id: string;
+      expires_at: Date;
+    }>("SELECT id, user_id, expires_at FROM sessions WHERE token_hash = $1", [tokenHash]);
+    if (rows.length === 0) {
+      throw new UnauthorizedException("Invalid refresh token");
+    }
+    const session = rows[0];
+    if (session.expires_at < new Date()) {
+      await this.database.query("DELETE FROM sessions WHERE id = $1", [session.id]);
+      throw new UnauthorizedException("Refresh token expired");
+    }
+    const user = await this.findUserById(session.user_id);
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+    const accessToken = await this.signAccessToken(user.id, user.email, session.id);
+    return { accessToken };
   }
 
   async getCurrentUser(userId: string): Promise<AuthenticatedUser> {
@@ -72,10 +98,16 @@ export class AuthService {
   }
 
   async logout(sessionId: string): Promise<void> {
+    this.cache.delete(this.buildSessionCacheKey(sessionId));
     await this.database.query("DELETE FROM sessions WHERE id = $1", [sessionId]);
   }
 
   async validateSession(payload: JwtPayload): Promise<AuthenticatedUser | null> {
+    const cacheKey = this.buildSessionCacheKey(payload.sessionId);
+    const cached = this.cache.get<AuthenticatedUser>(cacheKey);
+    if (cached) {
+      return cached;
+    }
     const { rows } = await this.database.query<{ expires_at: Date }>(
       "SELECT expires_at FROM sessions WHERE id = $1 AND user_id = $2",
       [payload.sessionId, payload.sub],
@@ -85,13 +117,20 @@ export class AuthService {
     }
     if (rows[0].expires_at < new Date()) {
       await this.database.query("DELETE FROM sessions WHERE id = $1", [payload.sessionId]);
+      this.cache.delete(cacheKey);
       return null;
     }
     const user = await this.findUserById(payload.sub);
     if (!user) {
       return null;
     }
-    return this.mapUser(user);
+    const authenticatedUser = this.mapUser(user);
+    this.cache.set(cacheKey, authenticatedUser, this.sessionCacheTtlMs, payload.sub);
+    return authenticatedUser;
+  }
+
+  private buildSessionCacheKey(sessionId: string): string {
+    return `session:${sessionId}`;
   }
 
   private async verifyGoogleToken(idToken: string): Promise<GoogleTokenPayload> {
@@ -140,16 +179,30 @@ export class AuthService {
     return rows[0] ?? null;
   }
 
-  private async createSession(userId: string): Promise<string> {
+  private async createSession(
+    userId: string,
+  ): Promise<{ sessionId: string; refreshToken: string }> {
     const sessionId = randomUUID();
-    const tokenHash = createHash("sha256").update(sessionId).digest("hex");
+    const refreshToken = randomUUID();
+    const tokenHash = createHash("sha256").update(refreshToken).digest("hex");
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    expiresAt.setDate(expiresAt.getDate() + this.sessionExpiresInDays);
     await this.database.query(
       "INSERT INTO sessions (id, user_id, token_hash, expires_at) VALUES ($1, $2, $3, $4)",
       [sessionId, userId, tokenHash, expiresAt],
     );
-    return sessionId;
+    return { sessionId, refreshToken };
+  }
+
+  private async signAccessToken(userId: string, email: string, sessionId: string): Promise<string> {
+    return this.jwtService.signAsync(
+      {
+        sub: userId,
+        email,
+        sessionId,
+      } satisfies JwtPayload,
+      { expiresIn: this.jwtAccessExpiresInSeconds },
+    );
   }
 
   private mapUser(user: UserRow): AuthenticatedUser {

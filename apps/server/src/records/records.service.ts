@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { QueryResultRow } from "pg";
+import { InMemoryCacheService } from "../core/cache/in-memory-cache.service";
 import { DatabaseService } from "../database.service";
 import { UsersService } from "../users/users.service";
 import { CreateRecordDto } from "./dto/create-record.dto";
@@ -37,6 +38,8 @@ const DEFAULT_CATEGORY_POINTS: Record<string, number> = {
   battery: 25,
 };
 
+const USER_RECORDS_CACHE_TTL_MS = 60 * 1000;
+
 /**
  * Manages disposal records and triggers point/badge updates.
  */
@@ -45,6 +48,7 @@ export class RecordsService {
   constructor(
     private readonly database: DatabaseService,
     private readonly usersService: UsersService,
+    private readonly cache: InMemoryCacheService,
   ) {}
 
   async createRecord(userId: string, createRecordDto: CreateRecordDto): Promise<DisposalRecord> {
@@ -68,10 +72,16 @@ export class RecordsService {
       );
       await this.usersService.evaluateBadges(userId);
     }
+    this.usersService.invalidateUserDataCaches(userId);
     return this.mapRecord(rows[0]);
   }
 
   async findUserRecords(userId: string): Promise<DisposalRecord[]> {
+    const cacheKey = `user-records:${userId}`;
+    const cached = this.cache.get<DisposalRecord[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
     const { rows } = await this.database.query<RecordRow>(
       `SELECT dr.id, dr.item_name, dr.category_id, dr.points, dr.status, dr.created_at,
               wc.name AS category_name
@@ -82,7 +92,9 @@ export class RecordsService {
        LIMIT 50`,
       [userId],
     );
-    return rows.map(row => this.mapRecord(row));
+    const records = rows.map(row => this.mapRecord(row));
+    this.cache.set(cacheKey, records, USER_RECORDS_CACHE_TTL_MS, userId);
+    return records;
   }
 
   private async ensureCategoryExists(categoryId: string): Promise<void> {

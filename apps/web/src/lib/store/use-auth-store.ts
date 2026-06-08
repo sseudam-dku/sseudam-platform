@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 import * as authApi from "@/lib/api/auth";
-import { getAccessToken } from "@/lib/api/client";
+import { clearLegacyAccessToken } from "@/lib/api/client";
 import type { AuthUser } from "@/lib/api/auth";
 
 interface AuthState {
@@ -35,10 +35,7 @@ async function initializeAuth(): Promise<void> {
   if (state.isInitialized || state.isLoading) {
     return;
   }
-  if (!getAccessToken()) {
-    setState({ isInitialized: true });
-    return;
-  }
+  clearLegacyAccessToken();
   setState({ isLoading: true });
   try {
     const user = await authApi.fetchCurrentUser();
@@ -60,7 +57,7 @@ const getServerSnapshot = () => state;
 export function useAuthStore() {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const loginWithGoogle = useCallback(async (idToken: string) => {
+  const loginWithGoogle = async (idToken: string) => {
     setState({ isLoading: true });
     try {
       const result = await authApi.loginWithGoogle(idToken);
@@ -70,22 +67,18 @@ export function useAuthStore() {
       setState({ isLoading: false });
       throw error;
     }
-  }, []);
+  };
 
-  const logout = useCallback(async () => {
+  const logout = async () => {
     setState({ isLoading: true });
     try {
       await authApi.logout();
     } finally {
       setState({ user: null, isLoading: false, isInitialized: true });
     }
-  }, []);
+  };
 
-  const refreshUser = useCallback(async () => {
-    if (!getAccessToken()) {
-      setState({ user: null });
-      return null;
-    }
+  const refreshUser = async () => {
     try {
       const user = await authApi.fetchCurrentUser();
       setState({ user });
@@ -94,7 +87,7 @@ export function useAuthStore() {
       setState({ user: null });
       return null;
     }
-  }, []);
+  };
 
   return {
     user: snapshot.user,

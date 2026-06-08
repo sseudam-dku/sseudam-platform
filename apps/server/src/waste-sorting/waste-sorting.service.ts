@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, OnModuleInit } from "@nestjs/common";
 import { QueryResultRow } from "pg";
+import { InMemoryCacheService } from "../core/cache/in-memory-cache.service";
 import { DatabaseService } from "../database.service";
-import { SeoulWasteApiService } from "./seoul-waste-api.service";
+import { RegionalWasteInfo, SeoulWasteApiService } from "./seoul-waste-api.service";
 
 interface CategoryRow extends QueryResultRow {
   id: string;
@@ -45,25 +46,31 @@ export interface WasteCategoryDetail extends WasteCategory {
   source: "api" | "fallback";
 }
 
+const WASTE_GUIDE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
 /**
  * Provides waste sorting categories and region-aware disposal guides.
  */
 @Injectable()
-export class WasteSortingService {
+export class WasteSortingService implements OnModuleInit {
+  private cachedCategories: WasteCategory[] | null = null;
+
   constructor(
     private readonly database: DatabaseService,
     private readonly seoulWasteApiService: SeoulWasteApiService,
+    private readonly cache: InMemoryCacheService,
   ) {}
 
+  async onModuleInit(): Promise<void> {
+    this.cachedCategories = await this.loadCategoriesFromDb();
+  }
+
   async findAllCategories(): Promise<WasteCategory[]> {
-    const { rows } = await this.database.query<CategoryRow>(
-      "SELECT id, name FROM waste_categories ORDER BY sort_order ASC",
-    );
-    return rows.map(row => ({
-      id: row.id,
-      name: row.name,
-      href: "/category",
-    }));
+    if (this.cachedCategories) {
+      return this.cachedCategories;
+    }
+    this.cachedCategories = await this.loadCategoriesFromDb();
+    return this.cachedCategories;
   }
 
   async findCategoryDetail(
@@ -71,6 +78,11 @@ export class WasteSortingService {
     city: string,
     district: string,
   ): Promise<WasteCategoryDetail> {
+    const cacheKey = this.buildGuideCacheKey(city, district, categoryId);
+    const cached = this.cache.get<WasteCategoryDetail>(cacheKey);
+    if (cached) {
+      return cached;
+    }
     const { rows } = await this.database.query<CategoryRow>(
       "SELECT id, name FROM waste_categories WHERE id = $1",
       [categoryId],
@@ -80,25 +92,10 @@ export class WasteSortingService {
     }
     const apiGuide = await this.seoulWasteApiService.fetchRegionalGuide(city, district, categoryId);
     if (apiGuide) {
-      return {
-        id: rows[0].id,
-        name: rows[0].name,
-        href: "/category",
-        district,
-        displayLocation: `${city} ${district}`,
-        method: apiGuide.method,
-        schedule: apiGuide.schedule,
-        noCollectDay: apiGuide.noCollectDay,
-        disposalPlace: apiGuide.disposalPlace,
-        disposalPlaceType: apiGuide.disposalPlaceType,
-        disposalTimeStart: apiGuide.disposalTimeStart,
-        disposalTimeEnd: apiGuide.disposalTimeEnd,
-        managementZone: apiGuide.managementZone,
-        generalWasteMethod: apiGuide.generalWasteMethod,
-        generalWasteSchedule: apiGuide.generalWasteSchedule,
-        caution: apiGuide.caution,
-        source: apiGuide.source,
-      };
+      await this.persistApiGuide(categoryId, district, apiGuide);
+      const detail = this.buildCategoryDetailFromApi(rows[0], city, district, apiGuide);
+      this.cache.set(cacheKey, detail, WASTE_GUIDE_CACHE_TTL_MS);
+      return detail;
     }
     const { rows: guideRows } = await this.database.query<GuideRow>(
       `SELECT method, caution, schedule, no_collect_day, disposal_place,
@@ -109,7 +106,92 @@ export class WasteSortingService {
       [categoryId, district],
     );
     const fallback = guideRows[0] ?? (await this.getDefaultGuide(categoryId));
-    return this.buildCategoryDetail(rows[0], city, district, fallback, "fallback");
+    const detail = this.buildCategoryDetail(rows[0], city, district, fallback, "fallback");
+    this.cache.set(cacheKey, detail, WASTE_GUIDE_CACHE_TTL_MS);
+    return detail;
+  }
+
+  private buildGuideCacheKey(city: string, district: string, categoryId: string): string {
+    return `waste-guide:${city}:${district}:${categoryId}`;
+  }
+
+  private async loadCategoriesFromDb(): Promise<WasteCategory[]> {
+    const { rows } = await this.database.query<CategoryRow>(
+      "SELECT id, name FROM waste_categories ORDER BY sort_order ASC",
+    );
+    return rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      href: "/category",
+    }));
+  }
+
+  private async persistApiGuide(
+    categoryId: string,
+    district: string,
+    guide: RegionalWasteInfo,
+  ): Promise<void> {
+    await this.database.query(
+      `INSERT INTO waste_guides (
+         category_id, district, method, caution, schedule, no_collect_day,
+         disposal_place, disposal_place_type, disposal_time_start, disposal_time_end,
+         management_zone, general_waste_method, general_waste_schedule
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       ON CONFLICT (category_id, district) DO UPDATE SET
+         method = EXCLUDED.method,
+         caution = EXCLUDED.caution,
+         schedule = EXCLUDED.schedule,
+         no_collect_day = EXCLUDED.no_collect_day,
+         disposal_place = EXCLUDED.disposal_place,
+         disposal_place_type = EXCLUDED.disposal_place_type,
+         disposal_time_start = EXCLUDED.disposal_time_start,
+         disposal_time_end = EXCLUDED.disposal_time_end,
+         management_zone = EXCLUDED.management_zone,
+         general_waste_method = EXCLUDED.general_waste_method,
+         general_waste_schedule = EXCLUDED.general_waste_schedule`,
+      [
+        categoryId,
+        district,
+        guide.method,
+        guide.caution,
+        guide.schedule,
+        guide.noCollectDay,
+        guide.disposalPlace,
+        guide.disposalPlaceType,
+        guide.disposalTimeStart,
+        guide.disposalTimeEnd,
+        guide.managementZone,
+        guide.generalWasteMethod,
+        guide.generalWasteSchedule,
+      ],
+    );
+  }
+
+  private buildCategoryDetailFromApi(
+    category: CategoryRow,
+    city: string,
+    district: string,
+    apiGuide: RegionalWasteInfo,
+  ): WasteCategoryDetail {
+    return {
+      id: category.id,
+      name: category.name,
+      href: "/category",
+      district,
+      displayLocation: `${city} ${district}`,
+      method: apiGuide.method,
+      schedule: apiGuide.schedule,
+      noCollectDay: apiGuide.noCollectDay,
+      disposalPlace: apiGuide.disposalPlace,
+      disposalPlaceType: apiGuide.disposalPlaceType,
+      disposalTimeStart: apiGuide.disposalTimeStart,
+      disposalTimeEnd: apiGuide.disposalTimeEnd,
+      managementZone: apiGuide.managementZone,
+      generalWasteMethod: apiGuide.generalWasteMethod,
+      generalWasteSchedule: apiGuide.generalWasteSchedule,
+      caution: apiGuide.caution,
+      source: apiGuide.source,
+    };
   }
 
   private buildCategoryDetail(

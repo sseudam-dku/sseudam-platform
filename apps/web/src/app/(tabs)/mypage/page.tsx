@@ -3,40 +3,18 @@
 import { ChevronRight, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 import GoogleAuthButton from "@/components/auth/google-auth-button";
 import iconPoint from "@/assets/icon-point.svg";
 import { LoadingScreen } from "@/components/ui/loading-screen";
-import { fetchUserBadges, fetchUserStats, type UserBadge, type UserStats } from "@/lib/api/users";
+import { useUserBadges, useUserStats } from "@/lib/query/hooks";
 import { useAuthStore } from "@/lib/store/use-auth-store";
 import { cn } from "@/lib/cn";
 
 const Page = () => {
   const { user, isLoggedIn, isLoading, isInitialized, logout } = useAuthStore();
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [badges, setBadges] = useState<UserBadge[]>([]);
-
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    let cancelled = false;
-    void Promise.all([fetchUserStats(), fetchUserBadges()])
-      .then(([statsData, badgesData]) => {
-        if (!cancelled) {
-          setStats(statsData);
-          setBadges(badgesData);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setStats(null);
-          setBadges([]);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoggedIn, user?.id]);
+  const { data: stats } = useUserStats(isLoggedIn);
+  const { data: badges = [] } = useUserBadges(isLoggedIn);
 
   if (!isInitialized || isLoading) {
     return <LoadingScreen />;

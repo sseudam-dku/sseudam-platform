@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from "@nestjs/common";
+import { Controller, Get, Header, Param, Query } from "@nestjs/common";
 import { ApiNotFoundResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CategoryDetailQueryDto } from "./dto/category-detail-query.dto";
 import {
@@ -13,6 +13,7 @@ export class WasteSortingController {
   constructor(private readonly wasteSortingService: WasteSortingService) {}
 
   @Get("categories")
+  @Header("Cache-Control", "public, max-age=86400")
   @ApiOperation({
     summary: "카테고리 목록 조회",
     description: "분리배출 카테고리 전체 목록을 반환합니다. 인증 불필요. ",
@@ -27,6 +28,7 @@ export class WasteSortingController {
   }
 
   @Get("categories/:id")
+  @Header("Cache-Control", "public, max-age=3600")
   @ApiOperation({
     summary: "카테고리별 배출 방법 조회",
     description:

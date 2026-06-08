@@ -1,13 +1,14 @@
+"use client";
+
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { Camera, MessageSquareText, RotateCw } from "lucide-react";
 import { DisposalGuideSection } from "@/components/camera/disposal-guide-section";
 import { PartsContentSection } from "@/components/camera/parts-content-section";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { Button } from "@/components/ui/button";
 import type { DetectedWasteItem } from "@/lib/api/camera";
-import { fetchCategoryDetail, type WasteCategoryDetail } from "@/lib/api/waste-sorting";
 import { buildDisposalGuideSteps } from "@/lib/disposal-guide";
+import { useWasteGuides } from "@/lib/query/hooks";
 
 export interface TrashAnalysisResult {
   detectedItems: DetectedWasteItem[];
@@ -48,43 +49,13 @@ const CameraResult = ({
 }: CameraResultProps) => {
   const result = analysisResult || DEFAULT_ANALYSIS_RESULT;
   const detectedItems = result.detectedItems;
-  const [guidesByCategoryId, setGuidesByCategoryId] = useState<
-    Record<string, WasteCategoryDetail | null>
-  >({});
-  const [isLoadingGuides, setIsLoadingGuides] = useState(false);
-
-  useEffect(() => {
-    if (!isSuccess || detectedItems.length === 0) {
-      return;
-    }
-    const categoryIds = [...new Set(detectedItems.map(item => item.categoryId))];
-    let cancelled = false;
-    setIsLoadingGuides(true);
-    void Promise.all(
-      categoryIds.map(async categoryId => {
-        try {
-          const guide = await fetchCategoryDetail(categoryId, city, district);
-          return [categoryId, guide] as const;
-        } catch {
-          return [categoryId, null] as const;
-        }
-      }),
-    )
-      .then(entries => {
-        if (cancelled) {
-          return;
-        }
-        setGuidesByCategoryId(Object.fromEntries(entries));
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoadingGuides(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isSuccess, city, district, analysisResult]);
+  const categoryIds = [...new Set(detectedItems.map(item => item.categoryId))];
+  const guideQueries = useWasteGuides(categoryIds, city, district, isSuccess);
+  const guidesByCategoryId: Record<string, (typeof guideQueries)[number]["data"]> = {};
+  categoryIds.forEach((categoryId, index) => {
+    guidesByCategoryId[categoryId] = guideQueries[index]?.data;
+  });
+  const isLoadingGuides = guideQueries.some(query => query.isLoading);
 
   const primaryGuide = guidesByCategoryId[detectedItems[0]?.categoryId] ?? null;
   const scheduleText =
