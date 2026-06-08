@@ -283,10 +283,10 @@ export class ChatService {
     };
   }
 
-  private async buildBlockedMessageResult(
+  private buildBlockedMessageResult(
     message: string,
     sessionId: string | undefined,
-  ): Promise<SendMessageResult> {
+  ): SendMessageResult {
     const activeSessionId = sessionId ?? randomUUID();
     return {
       sessionId: activeSessionId,
