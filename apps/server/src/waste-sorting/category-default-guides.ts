@@ -1,11 +1,9 @@
-import type { WasteCategoryDetail } from "@/lib/api/waste-sorting";
-
-interface CategoryDefaultGuide {
+export interface CategoryDefaultGuide {
   method: string;
   caution: string;
 }
 
-const CATEGORY_DEFAULT_GUIDES: Record<string, CategoryDefaultGuide> = {
+export const CATEGORY_DEFAULT_GUIDES: Record<string, CategoryDefaultGuide> = {
   plastic: {
     method: "내용물을 깨끗이 비우고 압착한 후 뚜껑을 제거하여 플라스틱 수거함에 배출하세요.",
     caution: "이물질이 많이 묻은 경우 일반쓰레기로 배출하세요.",
@@ -43,45 +41,3 @@ const CATEGORY_DEFAULT_GUIDES: Record<string, CategoryDefaultGuide> = {
     caution: "리튬·니카드 배터리는 별도 수거함에 배출하세요.",
   },
 };
-
-const GENERIC_FALLBACK_METHOD = "지역별 분리배출 규정을 확인해 주세요.";
-
-function resolveGuideContent(
-  guide: WasteCategoryDetail | null,
-  categoryId?: string,
-): CategoryDefaultGuide | null {
-  if (guide?.method && guide.method !== GENERIC_FALLBACK_METHOD) {
-    return {
-      method: guide.method,
-      caution: guide.caution,
-    };
-  }
-  if (categoryId && CATEGORY_DEFAULT_GUIDES[categoryId]) {
-    return CATEGORY_DEFAULT_GUIDES[categoryId];
-  }
-  if (guide?.method || guide?.caution) {
-    return {
-      method: guide.method,
-      caution: guide.caution,
-    };
-  }
-  return null;
-}
-
-export function buildDisposalGuideSteps(
-  guide: WasteCategoryDetail | null,
-  categoryId?: string,
-): string[] {
-  const resolvedGuide = resolveGuideContent(guide, categoryId);
-  const steps: string[] = [];
-  if (resolvedGuide?.method) {
-    steps.push(resolvedGuide.method);
-  }
-  if (resolvedGuide?.caution) {
-    steps.push(resolvedGuide.caution);
-  }
-  if (steps.length === 0) {
-    steps.push("정확한 배출 방법은 거주 지역 구청 홈페이지에서 확인해 주세요.");
-  }
-  return steps;
-}

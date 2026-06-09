@@ -91,7 +91,10 @@ export function CameraClient() {
         setState("failure");
         return;
       }
-      setAnalysisResult({ detectedItems: result.detectedItems });
+      setAnalysisResult({
+        detectedItems: result.detectedItems,
+        scheduleHint: result.scheduleHint,
+      });
       setState("success");
       const primaryItem = [...result.detectedItems].sort((a, b) => b.confidence - a.confidence)[0];
       await createRecord({

@@ -14,10 +14,12 @@ export interface DetectedWasteItem {
   parts: DetectedWastePart[];
   categoryId: string;
   categoryLabel: string;
+  disposalGuideSteps?: string[];
 }
 
 export interface CameraAnalysisResult {
   detectedItems: DetectedWasteItem[];
+  scheduleHint?: string | null;
 }
 
 export async function analyzeImage(file: Blob): Promise<CameraAnalysisResult> {

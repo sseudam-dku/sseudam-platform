@@ -42,9 +42,15 @@ export class DetectedWasteItemDto {
 
   @ApiProperty({ description: "분류 라벨 (한글)", example: "PET(페트)" })
   categoryLabel!: string;
+
+  @ApiProperty({ type: [String] })
+  disposalGuideSteps!: string[];
 }
 
 export class CameraAnalysisResponseDto {
   @ApiProperty({ type: [DetectedWasteItemDto], description: "인식된 쓰레기 목록" })
   detectedItems!: DetectedWasteItemDto[];
+
+  @ApiProperty({ nullable: true })
+  scheduleHint!: string | null;
 }

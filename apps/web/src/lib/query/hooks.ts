@@ -17,7 +17,8 @@ export function useWasteGuide(
     queryKey: queryKeys.wasteGuide(categoryId ?? "", city, district),
     queryFn: () => fetchCategoryDetail(categoryId!, city, district),
     enabled: Boolean(categoryId) && enabled,
-    staleTime: 24 * 60 * 60 * 1000,
+    staleTime: 60 * 60 * 1000,
+    retry: 2,
   });
 }
 
@@ -32,7 +33,8 @@ export function useWasteGuides(
       queryKey: queryKeys.wasteGuide(categoryId, city, district),
       queryFn: () => fetchCategoryDetail(categoryId, city, district),
       enabled: enabled && categoryIds.length > 0,
-      staleTime: 24 * 60 * 60 * 1000,
+      staleTime: 60 * 60 * 1000,
+      retry: 2,
     })),
   });
 }

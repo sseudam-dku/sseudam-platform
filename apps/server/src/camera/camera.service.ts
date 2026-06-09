@@ -3,14 +3,18 @@ import { ConfigService } from "@nestjs/config";
 import OpenAI from "openai";
 
 import {
-  VISION_MAX_TOKENS,
-  VISION_MODEL,
-  VISION_TEMPERATURE,
+  CAMERA_MAX_TOKENS,
+  CAMERA_MODEL,
+  CAMERA_TEMPERATURE,
   WASTE_TYPE_LABELS,
   WASTE_TYPE_TO_CATEGORY_ID,
   WASTE_TYPES,
   type WasteType,
 } from "./camera.constants";
+import {
+  buildDisposalGuideSystemPrompt,
+  buildDisposalGuideUserPrompt,
+} from "./prompts/disposal-guide.prompt";
 import { buildVisionSystemPrompt } from "./prompts/system.prompt";
 import { VISION_USER_PROMPT } from "./prompts/user.prompt";
 
@@ -28,10 +32,12 @@ export interface DetectedWasteItem {
   parts: DetectedWastePart[];
   categoryId: string;
   categoryLabel: string;
+  disposalGuideSteps: string[];
 }
 
 export interface CameraAnalysisResult {
   detectedItems: DetectedWasteItem[];
+  scheduleHint: string | null;
 }
 
 interface VisionDetectedPart {
@@ -51,6 +57,11 @@ interface VisionAnalysisPayload {
   detectedItems?: VisionDetectedItem[];
 }
 
+interface DisposalGuidePayload {
+  scheduleHint?: string | null;
+  guides?: Array<{ disposalGuideSteps?: string[] }>;
+}
+
 /**
  * Analyzes waste images using OpenAI Vision API.
  */
@@ -66,15 +77,15 @@ export class CameraService {
   async analyzeImage(
     imageBuffer: Buffer,
     mimeType: string,
-    _city: string,
-    _district: string,
+    city: string,
+    district: string,
   ): Promise<CameraAnalysisResult> {
     if (!this.openai) {
       throw new ServiceUnavailableException("OpenAI API key is not configured");
     }
     const base64Image = imageBuffer.toString("base64");
     const response = await this.openai.chat.completions.create({
-      model: VISION_MODEL,
+      model: CAMERA_MODEL,
       messages: [
         {
           role: "system",
@@ -96,8 +107,8 @@ export class CameraService {
           ],
         },
       ],
-      temperature: VISION_TEMPERATURE,
-      max_tokens: VISION_MAX_TOKENS,
+      temperature: CAMERA_TEMPERATURE,
+      max_tokens: CAMERA_MAX_TOKENS,
       response_format: { type: "json_object" },
     });
     const content = response.choices[0]?.message?.content;
@@ -111,7 +122,73 @@ export class CameraService {
     if (detectedItems.length === 0) {
       throw new BadRequestException("No waste items detected in the image");
     }
-    return { detectedItems };
+    const guideResult = await this.generateDisposalGuides(detectedItems, city, district);
+    return {
+      detectedItems: guideResult.items,
+      scheduleHint: guideResult.scheduleHint,
+    };
+  }
+
+  private async generateDisposalGuides(
+    items: DetectedWasteItem[],
+    city: string,
+    district: string,
+  ): Promise<{ items: DetectedWasteItem[]; scheduleHint: string | null }> {
+    const fallbackItems = items.map(item => ({
+      ...item,
+      disposalGuideSteps: [],
+    }));
+    try {
+      const response = await this.openai!.chat.completions.create({
+        model: CAMERA_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: buildDisposalGuideSystemPrompt(city, district),
+          },
+          {
+            role: "user",
+            content: buildDisposalGuideUserPrompt(items),
+          },
+        ],
+        temperature: CAMERA_TEMPERATURE,
+        max_tokens: CAMERA_MAX_TOKENS,
+        response_format: { type: "json_object" },
+      });
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        return { items: fallbackItems, scheduleHint: null };
+      }
+      const parsed = JSON.parse(content) as DisposalGuidePayload;
+      const guides = parsed.guides ?? [];
+      return {
+        scheduleHint: this.normalizeScheduleHint(parsed.scheduleHint),
+        items: items.map((item, index) => ({
+          ...item,
+          disposalGuideSteps: this.normalizeGuideSteps(guides[index]?.disposalGuideSteps),
+        })),
+      };
+    } catch {
+      return { items: fallbackItems, scheduleHint: null };
+    }
+  }
+
+  private normalizeGuideSteps(steps: string[] | undefined): string[] {
+    if (!steps) {
+      return [];
+    }
+    return steps
+      .map(step => step.trim())
+      .filter(step => step.length > 0)
+      .slice(0, 4);
+  }
+
+  private normalizeScheduleHint(value: string | null | undefined): string | null {
+    const trimmed = value?.trim();
+    if (!trimmed || trimmed.toLowerCase() === "null") {
+      return null;
+    }
+    return trimmed;
   }
 
   private normalizeDetectedItem(item: VisionDetectedItem): DetectedWasteItem {
@@ -132,6 +209,7 @@ export class CameraService {
       parts,
       categoryId: WASTE_TYPE_TO_CATEGORY_ID[type],
       categoryLabel: WASTE_TYPE_LABELS[type],
+      disposalGuideSteps: [],
     };
   }
 

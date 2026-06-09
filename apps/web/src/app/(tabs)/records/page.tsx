@@ -25,7 +25,10 @@ function RecordGuideSection({
 }) {
   const { data: guide, isLoading } = useWasteGuide(categoryId, city, district);
   return (
-    <DisposalGuideSection steps={buildDisposalGuideSteps(guide ?? null)} isLoading={isLoading} />
+    <DisposalGuideSection
+      steps={buildDisposalGuideSteps(guide ?? null, categoryId)}
+      isLoading={isLoading}
+    />
   );
 }
 

@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException, OnModuleInit } from "@nestjs/com
 import { QueryResultRow } from "pg";
 import { InMemoryCacheService } from "../core/cache/in-memory-cache.service";
 import { DatabaseService } from "../database.service";
+import { CATEGORY_DEFAULT_GUIDES } from "./category-default-guides";
 import { RegionalWasteInfo, SeoulWasteApiService } from "./seoul-waste-api.service";
 
 interface CategoryRow extends QueryResultRow {
@@ -104,7 +105,7 @@ export class WasteSortingService implements OnModuleInit {
     this.logger.warn(
       `API guide not found for ${city} ${district} (${categoryId}). Using default fallback.`,
     );
-    const fallback = this.getDefaultGuide();
+    const fallback = this.getDefaultGuide(categoryId);
     const detail = this.buildCategoryDetail(rows[0], city, district, fallback, "fallback");
     this.cache.set(cacheKey, detail, WASTE_GUIDE_CACHE_TTL_MS);
     return detail;
@@ -180,10 +181,11 @@ export class WasteSortingService implements OnModuleInit {
     };
   }
 
-  private getDefaultGuide(): GuideRow {
+  private getDefaultGuide(categoryId: string): GuideRow {
+    const categoryGuide = CATEGORY_DEFAULT_GUIDES[categoryId];
     return {
-      method: "지역별 분리배출 규정을 확인해 주세요.",
-      caution: "구청 홈페이지에서 세부 배출 방법을 확인할 수 있습니다.",
+      method: categoryGuide?.method ?? "지역별 분리배출 규정을 확인해 주세요.",
+      caution: categoryGuide?.caution ?? "구청 홈페이지에서 세부 배출 방법을 확인할 수 있습니다.",
       schedule: null,
       no_collect_day: null,
       disposal_place: null,

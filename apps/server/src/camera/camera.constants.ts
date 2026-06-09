@@ -53,6 +53,6 @@ export const WASTE_TYPE_TO_CATEGORY_ID: Record<WasteType, string> = {
   UNKNOWN: "plastic",
 };
 
-export const VISION_MODEL = "gpt-4o-mini";
-export const VISION_TEMPERATURE = 0.2;
-export const VISION_MAX_TOKENS = 1500;
+export const CAMERA_MODEL = "gpt-4o-mini";
+export const CAMERA_TEMPERATURE = 0.2;
+export const CAMERA_MAX_TOKENS = 1500;

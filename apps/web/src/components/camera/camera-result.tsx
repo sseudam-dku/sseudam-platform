@@ -6,13 +6,11 @@ import { DisposalGuideSection } from "@/components/camera/disposal-guide-section
 import { PartsContentSection } from "@/components/camera/parts-content-section";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { Button } from "@/components/ui/button";
-import type { DetectedWasteItem } from "@/lib/api/camera";
+import type { CameraAnalysisResult } from "@/lib/api/camera";
 import { buildDisposalGuideSteps } from "@/lib/disposal-guide";
 import { useWasteGuides } from "@/lib/query/hooks";
 
-export interface TrashAnalysisResult {
-  detectedItems: DetectedWasteItem[];
-}
+export type TrashAnalysisResult = CameraAnalysisResult;
 
 interface CameraResultProps {
   isSuccess: boolean;
@@ -21,22 +19,8 @@ interface CameraResultProps {
   district: string;
   onReset: () => void;
   onNavigateChatbot: () => void;
-  analysisResult?: TrashAnalysisResult | null;
+  analysisResult: TrashAnalysisResult | null;
 }
-
-const DEFAULT_ANALYSIS_RESULT: TrashAnalysisResult = {
-  detectedItems: [
-    {
-      type: "METAL",
-      itemName: "알루미늄 캔",
-      name: "알루미늄 컵",
-      confidence: 0.88,
-      parts: [{ name: "컵 몸체", type: "METAL", typeLabel: "금속(캔·고철)" }],
-      categoryId: "can",
-      categoryLabel: "금속(캔·고철)",
-    },
-  ],
-};
 
 const CameraResult = ({
   isSuccess,
@@ -47,10 +31,14 @@ const CameraResult = ({
   onNavigateChatbot,
   analysisResult,
 }: CameraResultProps) => {
-  const result = analysisResult || DEFAULT_ANALYSIS_RESULT;
-  const detectedItems = result.detectedItems;
+  const detectedItems = analysisResult?.detectedItems ?? [];
   const categoryIds = [...new Set(detectedItems.map(item => item.categoryId))];
-  const guideQueries = useWasteGuides(categoryIds, city, district, isSuccess);
+  const guideQueries = useWasteGuides(
+    categoryIds,
+    city,
+    district,
+    isSuccess && detectedItems.length > 0,
+  );
   const guidesByCategoryId: Record<string, (typeof guideQueries)[number]["data"]> = {};
   categoryIds.forEach((categoryId, index) => {
     guidesByCategoryId[categoryId] = guideQueries[index]?.data;
@@ -59,9 +47,11 @@ const CameraResult = ({
 
   const primaryGuide = guidesByCategoryId[detectedItems[0]?.categoryId] ?? null;
   const scheduleText =
-    primaryGuide?.schedule ?? "지역별 배출 요일은 구청 홈페이지에서 확인해 주세요.";
+    analysisResult?.scheduleHint ??
+    primaryGuide?.schedule ??
+    "지역별 배출 요일은 구청 홈페이지에서 확인해 주세요.";
 
-  if (isSuccess) {
+  if (isSuccess && analysisResult && detectedItems.length > 0) {
     return (
       <div className="scrollbar-hide flex-1 overflow-y-auto bg-neutral-100">
         <div className="animate-page-enter flex flex-col gap-4 p-4 pb-8">
@@ -112,8 +102,18 @@ const CameraResult = ({
               <PartsContentSection parts={item.parts} />
 
               <DisposalGuideSection
-                steps={buildDisposalGuideSteps(guidesByCategoryId[item.categoryId] ?? null)}
-                isLoading={isLoadingGuides}
+                steps={
+                  item.disposalGuideSteps && item.disposalGuideSteps.length > 0
+                    ? item.disposalGuideSteps
+                    : buildDisposalGuideSteps(
+                        guidesByCategoryId[item.categoryId] ?? null,
+                        item.categoryId,
+                      )
+                }
+                isLoading={
+                  isLoadingGuides &&
+                  (!item.disposalGuideSteps || item.disposalGuideSteps.length === 0)
+                }
               />
             </div>
           ))}
