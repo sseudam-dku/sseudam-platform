@@ -43,11 +43,6 @@ export function clearTokens(): void {
   } catch {}
 }
 
-/** Removes legacy localStorage token from before cookie-only auth migration. */
-export function clearLegacyAccessToken(): void {
-  clearTokens();
-}
-
 interface ApiFetchOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   auth?: boolean;

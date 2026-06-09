@@ -14,7 +14,7 @@ import { GUEST_MESSAGE_LIMIT } from "@/lib/guest-chat";
 
 export const CHATBOT_QUICK_ACTIONS = [
   { emoji: "🧴", label: "플리스틱 배출 방법 알려줘." },
-  { emoji: "🍱", label: "음식물이 많이 뭍은 용기는 어디에 버려?" },
+  { emoji: "🍱", label: "음식물이 많이 묻은 용기는 어디에 버려?" },
   { emoji: "🪥", label: "칫솔은 일반쓰레기야 플라스틱이야?" },
 ] as const;
 

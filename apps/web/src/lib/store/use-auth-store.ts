@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 import * as authApi from "@/lib/api/auth";
-import { clearLegacyAccessToken, clearTokens, setTokens } from "@/lib/api/client";
+import { clearTokens, setTokens } from "@/lib/api/client";
 import type { AuthUser } from "@/lib/api/auth";
 
 interface AuthState {
@@ -35,7 +35,6 @@ async function initializeAuth(): Promise<void> {
   if (state.isInitialized || state.isLoading) {
     return;
   }
-  clearLegacyAccessToken();
   setState({ isLoading: true });
   try {
     const user = await authApi.fetchCurrentUser();
