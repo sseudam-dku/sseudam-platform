@@ -142,7 +142,7 @@ export class SeoulWasteApiService {
       let data: HouseholdWasteResponse;
       try {
         data = JSON.parse(text) as HouseholdWasteResponse;
-      } catch (e) {
+      } catch {
         this.logger.warn(
           `Failed to parse API response as JSON. Response starts with: ${text.substring(0, 100)}`,
         );

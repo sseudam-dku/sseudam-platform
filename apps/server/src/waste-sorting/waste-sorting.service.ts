@@ -104,7 +104,7 @@ export class WasteSortingService implements OnModuleInit {
     this.logger.warn(
       `API guide not found for ${city} ${district} (${categoryId}). Using default fallback.`,
     );
-    const fallback = await this.getDefaultGuide(categoryId);
+    const fallback = this.getDefaultGuide();
     const detail = this.buildCategoryDetail(rows[0], city, district, fallback, "fallback");
     this.cache.set(cacheKey, detail, WASTE_GUIDE_CACHE_TTL_MS);
     return detail;
@@ -180,7 +180,7 @@ export class WasteSortingService implements OnModuleInit {
     };
   }
 
-  private async getDefaultGuide(categoryId: string): Promise<GuideRow> {
+  private getDefaultGuide(): GuideRow {
     return {
       method: "지역별 분리배출 규정을 확인해 주세요.",
       caution: "구청 홈페이지에서 세부 배출 방법을 확인할 수 있습니다.",
