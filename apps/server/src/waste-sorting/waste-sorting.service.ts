@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException, OnModuleInit } from "@nestjs/common";
 import { QueryResultRow } from "pg";
 import { InMemoryCacheService } from "../core/cache/in-memory-cache.service";
 import { DatabaseService } from "../database.service";
@@ -46,13 +46,14 @@ export interface WasteCategoryDetail extends WasteCategory {
   source: "api" | "fallback";
 }
 
-const WASTE_GUIDE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const WASTE_GUIDE_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour for faster updates
 
 /**
  * Provides waste sorting categories and region-aware disposal guides.
  */
 @Injectable()
 export class WasteSortingService implements OnModuleInit {
+  private readonly logger = new Logger(WasteSortingService.name);
   private cachedCategories: WasteCategory[] | null = null;
 
   constructor(
@@ -92,27 +93,25 @@ export class WasteSortingService implements OnModuleInit {
     }
     const apiGuide = await this.seoulWasteApiService.fetchRegionalGuide(city, district, categoryId);
     if (apiGuide) {
-      await this.persistApiGuide(categoryId, district, apiGuide);
+      this.logger.log(
+        `Successfully fetched guide from API for ${city} ${district} (${categoryId})`,
+      );
       const detail = this.buildCategoryDetailFromApi(rows[0], city, district, apiGuide);
       this.cache.set(cacheKey, detail, WASTE_GUIDE_CACHE_TTL_MS);
       return detail;
     }
-    const { rows: guideRows } = await this.database.query<GuideRow>(
-      `SELECT method, caution, schedule, no_collect_day, disposal_place,
-              disposal_place_type, disposal_time_start, disposal_time_end,
-              management_zone, general_waste_method, general_waste_schedule
-       FROM waste_guides
-       WHERE category_id = $1 AND district = $2`,
-      [categoryId, district],
+
+    this.logger.warn(
+      `API guide not found for ${city} ${district} (${categoryId}). Using default fallback.`,
     );
-    const fallback = guideRows[0] ?? (await this.getDefaultGuide(categoryId));
+    const fallback = await this.getDefaultGuide(categoryId);
     const detail = this.buildCategoryDetail(rows[0], city, district, fallback, "fallback");
     this.cache.set(cacheKey, detail, WASTE_GUIDE_CACHE_TTL_MS);
     return detail;
   }
 
   private buildGuideCacheKey(city: string, district: string, categoryId: string): string {
-    return `waste-guide:${city}:${district}:${categoryId}`;
+    return `waste-guide:v2:${city}:${district}:${categoryId}`;
   }
 
   private async loadCategoriesFromDb(): Promise<WasteCategory[]> {
@@ -124,47 +123,6 @@ export class WasteSortingService implements OnModuleInit {
       name: row.name,
       href: "/category",
     }));
-  }
-
-  private async persistApiGuide(
-    categoryId: string,
-    district: string,
-    guide: RegionalWasteInfo,
-  ): Promise<void> {
-    await this.database.query(
-      `INSERT INTO waste_guides (
-         category_id, district, method, caution, schedule, no_collect_day,
-         disposal_place, disposal_place_type, disposal_time_start, disposal_time_end,
-         management_zone, general_waste_method, general_waste_schedule
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-       ON CONFLICT (category_id, district) DO UPDATE SET
-         method = EXCLUDED.method,
-         caution = EXCLUDED.caution,
-         schedule = EXCLUDED.schedule,
-         no_collect_day = EXCLUDED.no_collect_day,
-         disposal_place = EXCLUDED.disposal_place,
-         disposal_place_type = EXCLUDED.disposal_place_type,
-         disposal_time_start = EXCLUDED.disposal_time_start,
-         disposal_time_end = EXCLUDED.disposal_time_end,
-         management_zone = EXCLUDED.management_zone,
-         general_waste_method = EXCLUDED.general_waste_method,
-         general_waste_schedule = EXCLUDED.general_waste_schedule`,
-      [
-        categoryId,
-        district,
-        guide.method,
-        guide.caution,
-        guide.schedule,
-        guide.noCollectDay,
-        guide.disposalPlace,
-        guide.disposalPlaceType,
-        guide.disposalTimeStart,
-        guide.disposalTimeEnd,
-        guide.managementZone,
-        guide.generalWasteMethod,
-        guide.generalWasteSchedule,
-      ],
-    );
   }
 
   private buildCategoryDetailFromApi(
@@ -223,16 +181,6 @@ export class WasteSortingService implements OnModuleInit {
   }
 
   private async getDefaultGuide(categoryId: string): Promise<GuideRow> {
-    const { rows } = await this.database.query<GuideRow>(
-      `SELECT method, caution, schedule, no_collect_day, disposal_place,
-              disposal_place_type, disposal_time_start, disposal_time_end,
-              management_zone, general_waste_method, general_waste_schedule
-       FROM waste_guides WHERE category_id = $1 LIMIT 1`,
-      [categoryId],
-    );
-    if (rows[0]) {
-      return rows[0];
-    }
     return {
       method: "지역별 분리배출 규정을 확인해 주세요.",
       caution: "구청 홈페이지에서 세부 배출 방법을 확인할 수 있습니다.",

@@ -28,7 +28,7 @@ export class WasteSortingController {
   }
 
   @Get("categories/:id")
-  @Header("Cache-Control", "public, max-age=3600")
+  @Header("Cache-Control", "no-store")
   @ApiOperation({
     summary: "카테고리별 배출 방법 조회",
     description:

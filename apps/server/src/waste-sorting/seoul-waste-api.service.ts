@@ -66,6 +66,7 @@ const RECYCLABLE_CATEGORY_IDS = new Set([
 ]);
 
 const PLACEHOLDER_API_KEY_PATTERN = /your-data-go-kr-api-key|placeholder|changeme/i;
+const SUCCESS_RESULT_CODES = new Set(["0", "00"]);
 
 /**
  * Fetches regional waste disposal info from the public data API.
@@ -74,7 +75,7 @@ const PLACEHOLDER_API_KEY_PATTERN = /your-data-go-kr-api-key|placeholder|changem
 export class SeoulWasteApiService {
   private readonly logger = new Logger(SeoulWasteApiService.name);
   private readonly apiKey: string | undefined;
-  private readonly baseUrl = "https://apis.data.go.kr/1741000/household_waste_info/info";
+  private readonly baseUrl = "http://apis.data.go.kr/1741000/household_waste_info/info";
 
   constructor(configService: ConfigService) {
     this.apiKey = configService.get<string>("DATA_GO_KR_API_KEY");
@@ -129,6 +130,7 @@ export class SeoulWasteApiService {
   ): Promise<RegionalWasteInfo | null> {
     try {
       const url = this.buildRequestUrl(searchTerm);
+      this.logger.log(`Fetching waste info from API: ${url}`);
       const response = await fetch(url);
       if (!response.ok) {
         this.logger.warn(
@@ -136,9 +138,19 @@ export class SeoulWasteApiService {
         );
         return null;
       }
-      const data = (await response.json()) as HouseholdWasteResponse;
+      const text = await response.text();
+      let data: HouseholdWasteResponse;
+      try {
+        data = JSON.parse(text) as HouseholdWasteResponse;
+      } catch (e) {
+        this.logger.warn(
+          `Failed to parse API response as JSON. Response starts with: ${text.substring(0, 100)}`,
+        );
+        return null;
+      }
+
       const resultCode = data.response?.header?.resultCode;
-      if (resultCode && resultCode !== "00") {
+      if (resultCode && !SUCCESS_RESULT_CODES.has(resultCode)) {
         this.logger.warn(
           `Household waste API error ${resultCode}: ${data.response?.header?.resultMsg ?? "unknown"}`,
         );
@@ -169,7 +181,7 @@ export class SeoulWasteApiService {
         disposalPlaceType: this.trimOrNull(target.EMSN_PLC_TYPE),
         disposalTimeStart: disposalTime.start,
         disposalTimeEnd: disposalTime.end,
-        managementZone,
+        managementZone: this.formatManagementZoneValue(managementZone),
         generalWasteMethod: this.trimOrNull(target.LF_WST_EMSN_MTHD),
         generalWasteSchedule: this.formatScheduleValue(this.trimOrNull(target.LF_WST_EMSN_DOW)),
         source: "api",
@@ -238,14 +250,19 @@ export class SeoulWasteApiService {
   }
 
   private buildRequestUrl(searchTerm: string): string {
+    const serviceKey = this.formatServiceKey(this.apiKey!);
+    const baseUrl = this.baseUrl;
+
+    // URLSearchParams encodes [ and ] which some public data APIs don't handle well.
+    // We'll build the query string manually for the cond parameter.
     const params = new URLSearchParams({
       pageNo: "1",
       numOfRows: "100",
       returnType: "json",
     });
-    params.set("cond[SGG_NM::LIKE]", searchTerm);
-    const serviceKey = this.formatServiceKey(this.apiKey!);
-    return `${this.baseUrl}?serviceKey=${serviceKey}&${params.toString()}`;
+
+    const queryString = `${params.toString()}&cond[SGG_NM::LIKE]=${encodeURIComponent(searchTerm)}`;
+    return `${baseUrl}?serviceKey=${serviceKey}&${queryString}`;
   }
 
   private formatServiceKey(apiKey: string): string {
@@ -268,6 +285,13 @@ export class SeoulWasteApiService {
       return null;
     }
     return value.replace(/\+/g, "·");
+  }
+
+  private formatManagementZoneValue(value: string | null): string | null {
+    if (!value) {
+      return null;
+    }
+    return value.replace(/\+/g, ", ");
   }
 
   private extractDisposalTime(
