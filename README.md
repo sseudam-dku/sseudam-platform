@@ -1,9 +1,7 @@
 # 쓰담 (Sseudam) ♻️
 
 > **AI 기반 올바른 분리배출 도우미 PWA** — 사진 한 장으로 헷갈리는 분리배출을 즉시 알려주고, 습관이 되도록 기록·포인트·뱃지로 동기를 부여합니다.
-<img width="1920" height="1080" alt="처음 장표" src="https://github.com/user-attachments/assets/d8dd8716-9e2b-4d57-a7e0-49a5cc1c6f8d" />
-
-
+> <img width="1920" height="1080" alt="처음 장표" src="https://github.com/user-attachments/assets/d8dd8716-9e2b-4d57-a7e0-49a5cc1c6f8d" />
 
 ---
 
@@ -31,9 +29,8 @@
 
 - 14종 분리배출 유형 분류: 종이 · 플라스틱 · PET · 비닐 · 스티로폼 · 유리 · 금속 · 의류/섬유 · 전자폐기물 · 유해 소형폐기물 · 음식물 · 일반쓰레기 · 대형폐기물 · 분류 불가
 - 인식 결과에 맞는 배출 방법 가이드 연결
-  
-<img width="1920" height="1080" alt="핵심 기능 소개" src="https://github.com/user-attachments/assets/dcc60c1f-11a1-4f44-b946-b47266344fd3" />
 
+<img width="1920" height="1080" alt="핵심 기능 소개" src="https://github.com/user-attachments/assets/dcc60c1f-11a1-4f44-b946-b47266344fd3" />
 
 ### 📚 분리배출 카테고리 가이드
 
@@ -43,7 +40,6 @@
 - 기본 가이드(category default guides) + 공공데이터 응답 결합
 
 <img width="1920" height="1080" alt="Group 7" src="https://github.com/user-attachments/assets/30cccff5-12aa-4e0b-b3a1-8c681b2e0704" />
-
 
 ### 💬 AI 챗봇
 
@@ -55,13 +51,11 @@
 
 <img width="1920" height="1080" alt="핵심 기능 소개" src="https://github.com/user-attachments/assets/957fa359-851f-4d42-9370-2adf5a044428" />
 
-
 ### 📍 GPS 기반 위치 설정
 
 GPS로 현재 위치의 지자체를 자동 인식하고, 검색을 통해 원하는 지역도 직접 설정할 수 있습니다. 지역마다 다른 분리배출 규정과 수거 일정까지 맞춤으로 안내합니다.
 
 <img width="1920" height="1080" alt="핵심 기능 소개" src="https://github.com/user-attachments/assets/c68f36d7-8706-4c9b-81ab-98e1b11a5fd7" />
-
 
 ---
 
@@ -94,31 +88,30 @@ GPS로 현재 위치의 지자체를 자동 인식하고, 검색을 통해 원�
 
 <img width="1353" height="757" alt="image 33" src="https://github.com/user-attachments/assets/26b32c7a-3f91-4474-8b81-491fbaafe581" />
 
-
 ### Frontend (`apps/web`)
 
-| 구분         | 기술                                                          |
-| ------------ | ------------------------------------------------------------- |
-| Framework    | Next.js 16 (App Router), React 19, React Compiler             |
-| Language     | TypeScript 6                                                  |
-| Styling      | Tailwind CSS v4                                               |
-| State / Data | TanStack Query (React Query)                                  |
-| UI           | Radix UI, lucide-react, sonner, vaul, Lottie                 |
-| Map          | Mapbox GL, react-map-gl                                       |
-| Auth         | @react-oauth/google                                          |
-| 기타         | PWA                                                            |
+| 구분         | 기술                                              |
+| ------------ | ------------------------------------------------- |
+| Framework    | Next.js 16 (App Router), React 19, React Compiler |
+| Language     | TypeScript 6                                      |
+| Styling      | Tailwind CSS v4                                   |
+| State / Data | TanStack Query (React Query)                      |
+| UI           | Radix UI, lucide-react, sonner, vaul, Lottie      |
+| Map          | Mapbox GL, react-map-gl                           |
+| Auth         | @react-oauth/google                               |
+| 기타         | PWA                                               |
 
 ### Backend (`apps/server`)
 
-| 구분         | 기술                                            |
-| ------------ | ----------------------------------------------- |
-| Framework    | NestJS 11 (REST API)                            |
-| Language     | TypeScript 6                                    |
-| Database     | PostgreSQL                                      |
-| Auth         | Passport-JWT, @nestjs/jwt, google-auth-library  |
-| AI           | OpenAI SDK (gpt-4o-mini, Vision)                |
-| API 문서     | Swagger (@nestjs/swagger)                       |
-| 검증         | class-validator, class-transformer              |
+| 구분      | 기술                                           |
+| --------- | ---------------------------------------------- |
+| Framework | NestJS 11 (REST API)                           |
+| Language  | TypeScript 6                                   |
+| Database  | PostgreSQL                                     |
+| Auth      | Passport-JWT, @nestjs/jwt, google-auth-library |
+| AI        | OpenAI SDK (gpt-4o-mini, Vision)               |
+| API 문서  | Swagger (@nestjs/swagger)                      |
+| 검증      | class-validator, class-transformer             |
 
 ### Infra & 외부 API
 
@@ -156,15 +149,15 @@ sseudam/
 
 ### 주요 API 모듈
 
-| 모듈            | 역할                                  |
-| --------------- | ------------------------------------- |
-| `auth`          | Google OAuth · JWT 인증               |
-| `camera`        | 이미지 분석(Vision) 분리배출 인식     |
-| `chat`          | AI 챗봇 · 세션 · 가드레일             |
-| `waste-sorting` | 카테고리 가이드 · 서울시 공공데이터   |
-| `records`       | 분리배출 기록                         |
-| `points`        | 포인트 적립 · 거래 내역               |
-| `users`         | 프로필 · 위치 · 통계 · 뱃지 · 포인트  |
+| 모듈            | 역할                                 |
+| --------------- | ------------------------------------ |
+| `auth`          | Google OAuth · JWT 인증              |
+| `camera`        | 이미지 분석(Vision) 분리배출 인식    |
+| `chat`          | AI 챗봇 · 세션 · 가드레일            |
+| `waste-sorting` | 카테고리 가이드 · 서울시 공공데이터  |
+| `records`       | 분리배출 기록                        |
+| `points`        | 포인트 적립 · 거래 내역              |
+| `users`         | 프로필 · 위치 · 통계 · 뱃지 · 포인트 |
 
 ---
 
@@ -207,9 +200,7 @@ sseudam/
 
 ## 7. 팀 소개
 
-| 이름     | 담당                |
-| -------- | ------------------- |
-| _임세윤_ | _기획, 디자인, FE, BE_       |
-| _강신호_ | _AI_       |
-
-
+| 이름     | 담당                   |
+| -------- | ---------------------- |
+| _임세윤_ | _기획, 디자인, FE, BE_ |
+| _강신호_ | _AI_                   |
