@@ -68,18 +68,25 @@ GPS로 현재 위치의 지자체를 자동 인식하고, 검색을 통해 원�
 ## 3. 기능 스크린샷
 
 1️⃣ 홈 대시보드 — 오늘의 팁 + 카테고리 바로가기
+<img width="1920" height="1080" alt="Group 8" src="https://github.com/user-attachments/assets/f3632936-2106-4e92-acbe-bffe0b249b85" />
 
 2️⃣ AI 카메라 분리배출 인식 — Vision으로 14종 판별
+<img width="1920" height="1080" alt="Group 9" src="https://github.com/user-attachments/assets/a86c9990-0ac4-4804-91f9-91285ce658b1" />
 
 3️⃣ AI 챗봇 — Q&A
+<img width="1920" height="1080" alt="Group 10" src="https://github.com/user-attachments/assets/78b3d496-ed76-4b5b-9831-8279d3535fe9" />
 
 4️⃣ 분리배출 카테고리 가이드 — 서울시 공공데이터 연동
+<img width="1920" height="1080" alt="Group 11" src="https://github.com/user-attachments/assets/6e07d1a7-9b2a-4287-8d4e-fc4ed66c2343" />
 
 5️⃣ 최근 기록 — 활동 내역
+<img width="1920" height="1080" alt="최근 기록" src="https://github.com/user-attachments/assets/7a41fbfe-7b31-4923-bc1b-fd83e2a33183" />
 
 6️⃣ 마이페이지 — 포인트·뱃지
+<img width="1920" height="1080" alt="마이페이지" src="https://github.com/user-attachments/assets/ceab79b8-6e10-4acb-a35e-280ca549445f" />
 
 7️⃣ 위치 설정·로그인 — 구글 OAuth + Mapbox
+<img width="1920" height="1080" alt="위치 설정·로그인" src="https://github.com/user-attachments/assets/2c2eb041-d5d8-430b-9305-17dd8a0203a7" />
 
 ---
 
